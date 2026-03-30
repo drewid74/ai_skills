@@ -15,6 +15,13 @@ skill-name/
 ```
 
 ---
+## References in This Repo
+
+### [claude-capabilities-catalog](claude-capabilities-catalog/SKILL.md)
+**Reference for all available tools, MCPs, skills, and triggers currently in Claude.**
+
+### [cross_agent_skills](cross_agent_skills.md)
+**Cross-Agent Skills & Capabilities Audit Prompt to generate a comparable capabilities catalog.**
 
 ## Skills in This Repo
 
