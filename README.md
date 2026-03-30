@@ -15,13 +15,21 @@ skill-name/
 ```
 
 ---
+
 ## References in This Repo
 
-### [claude-capabilities-catalog](claude-capabilities-catalog/SKILL.md)
+### [claude_capabilities_catalog](claude_capabilities_catalog.md)
 **Reference for all available tools, MCPs, skills, and triggers currently in Claude.**
+
+### [ChatGPT_Capabilities_Catalog](chatgpt_capabilities_catalog.md)
+**ChatGPT Capabilities Catalog with available tools, MCPs, skills, and triggers.**
+
+### [gemini_capabilities_catalog](gemini_capabilities_catalog.md)
+**Gemini capabilities catalog with available tools, MCPs, skills, and triggers.**
 
 ### [cross_agent_skills](cross_agent_skills.md)
 **Cross-Agent Skills & Capabilities Audit Prompt to generate a comparable capabilities catalog.**
+
 
 ## Skills in This Repo
 
