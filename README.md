@@ -78,6 +78,42 @@ Covers cron expression reference and scheduled task creation, self-contained tas
 
 ---
 
+### [deep_research](deep_research/SKILL.md)
+**Web research, fact-grounding, and sourced technical analysis.**
+
+Eliminates hallucinations by grounding every claim in real-world data. Enforces a structured research protocol: query expansion into 3-5 sub-queries, source diversity across at least 3 domains, recency filtering (18 months for tech), and triangulation requiring two independent sources before marking a fact "Confirmed." Supports market analysis, spec verification, literature reviews, and OSINT fusion. Outputs include a confidence score, hyperlinked source list, and TL;DR synthesis.
+
+**Triggers on:** research, search, find, check, latest news, documentation, specs, comparison, who is, what is the best, current trends, citations, links.
+
+---
+
+### [sequential_thinking](sequential_thinking/SKILL.md)
+**Structured reasoning framework for complex architecture, debugging, and decisions.**
+
+Forces exploration of a reasoning tree before answering — deconstructing requirements into atomic constraints, branching into optimal vs. fast paths, validating against edge cases, and synthesizing a justified recommendation. Includes a root cause analysis workflow for debugging (observation → history → hypothesis → isolation). Supports architectural review, decision matrices, and dependency mapping.
+
+**Triggers on:** why, how should I approach, debug, architecture, logic, plan, strategy, complex, broken, root cause, analyze, tasks with more than 5 dependencies.
+
+---
+
+### [google_workspace_assistant](google_workspace_assistant/SKILL.md)
+**Automate Gmail, Calendar, Google Sheets, and Drive via Google Workspace MCP tools.**
+
+Bridges raw data and professional communication across the GWS ecosystem. Enforces a drafting-first workflow (never sends without explicit confirmation), context retrieval from prior email threads before composing, and scheduling rules (15-minute transition buffers, purpose/agenda required on all invites). Supports inbox triage, report-to-Sheets sync, and daily briefing generation from Calendar and Gmail.
+
+**Triggers on:** email, Gmail, draft, inbox, calendar, meeting, schedule, appointment, spreadsheet, Sheets, Google Docs, Drive, sync data, send report, check availability, organize my day.
+
+---
+
+### [frontend_design_ux_enforcement.md](frontend_design_ux_enforcement.md/SKILL.md)
+**UI/UX development, design system enforcement, and accessibility audits.**
+
+Enforces a "No-Average" design philosophy: high-contrast typography scales, functional color palettes with a brand accent, and whitespace-first hierarchy on an 8px grid. Generates semantic HTML5/JSX with proper Next.js client/server separation, Tailwind v4 styling with `@theme` tokens, and full A11y compliance (ARIA labels, 4.5:1 contrast, keyboard navigation). Supports design audits, theme injection into `globals.css`, and mobile-first refactors.
+
+**Triggers on:** CSS, Tailwind, React, component, styling, UI, UX, responsive, mobile-first, accessibility, ARIA, Shadcn, Framer Motion, animation, layout, grid, flexbox, make it look better, fix the alignment, build a landing page.
+
+---
+
 ## Installation
 
 Copy any skill directory into your Claude Code skills folder:
