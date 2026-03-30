@@ -114,6 +114,24 @@ Enforces a "No-Average" design philosophy: high-contrast typography scales, func
 
 ---
 
+### [project_orchestrator](project_orchestrator/SKILL.md)
+**Multi-agent project orchestration — decompose, delegate, and coordinate across skills.**
+
+Acts as the central "Brain" for complex missions. Breaks high-level goals into a directed acyclic graph (DAG) of tasks, identifies dependencies, delegates to specialized skills with minimal context passing, checkpoints state after each completion, and synthesizes final delivery. Enforces a no-loop rule (halts after two agent hand-offs without progress) and tracks cost awareness by preferring local tools over expensive research calls.
+
+**Triggers on:** manage project, orchestrate, coordinate, start new build, full stack plan, integrate skills, workflow design, agent hand-off, multi-step mission.
+
+---
+
+### [repo_auditor](repo_auditor/SKILL.md)
+**Repository health audit — structure, documentation, links, and AI-readiness.**
+
+Evaluates a local or remote repository across four layers: structural integrity (README, LICENSE, .gitignore, llms.txt, CI/CD scaffolding), content quality (stale docs, clarity, naming consistency), link and dependency integrity (external URL 404 checks, internal path validation, version pinning), and AI-readiness (SKILL.md frontmatter validation, entrypoint documentation). Outputs an executive summary, categorized findings, and a prioritized action plan of quick vs. strategic fixes.
+
+**Triggers on:** audit repo, check repository, is this repo clean, review structure, missing files, broken links, repo best practices, check README, prepare for release.
+
+---
+
 ## Installation
 
 Copy any skill directory into your Claude Code skills folder:
