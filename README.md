@@ -1,157 +1,207 @@
-# AI Skills — Functional Skill Framework
+# AI Skills — 35+ Deep Domain Skills for Claude Code, Cursor, Codex & Beyond
 
-A collection of reusable skills files covering common (and not so common) technical workflows. Each skill is a self-contained instruction set that teaches your agents how to perform a specific domain of tasks reliably and consistently.
+> **Not 1,000 shallow templates. 35 skills that actually teach your AI how to think about a domain.** Each skill is 200-500 lines of battle-tested patterns, real code examples, decision frameworks, and troubleshooting guides — the kind of knowledge that turns a generic LLM into a domain expert. (AKA - I've learned from my mistakes and repetition)
 
-## What Is a Skill?
+[![Skills](https://img.shields.io/badge/skills-35-blue)]()
+[![Lines of Knowledge](https://img.shields.io/badge/lines-7%2C928-green)]()
+[![License](https://img.shields.io/badge/license-MIT-yellow)]()
 
-A skill is a directory containing a `SKILL.md` file with YAML frontmatter and markdown instructions. Claude reads the frontmatter description to decide when to invoke the skill, and the body to determine how to execute it. Skills can include optional scripts, reference docs, templates, and assets.
+---
+
+## Why This Collection?
+
+Most skill repos give you a paragraph per topic. This one gives you an **engineering reference** per topic. The difference:
+
+| Approach | Depth | Result |
+|----------|-------|--------|
+| Typical skill repo | "Use Docker. Pin image tags. Set restart policies." | LLM knows keywords but not tradeoffs |
+| **This repo** | Full Docker Compose templates, TrueNAS-specific patterns, GPU passthrough, reverse proxy integration, migration workflows, troubleshooting tables | LLM generates production-ready stacks and debugs real problems |
+
+Every skill explains **why**, not just what. The LLM reads these and understands the reasoning behind decisions — so it can adapt to your specific situation instead of parroting templates.
+
+---
+
+## Quick Install
+
+```bash
+# Full collection
+git clone https://github.com/drewid74/ai_skills.git ~/.claude/skills/ai_skills
+
+# Or cherry-pick individual skills
+cp -r ai_skills/docker-selfhost ~/.claude/skills/
+```
+
+Works with Claude Code, Cursor, Codex CLI, Windsurf, and any tool that reads `SKILL.md` files.
+
+---
+
+## Skills by Category
+
+### Infrastructure & Homelab
+
+| Skill | Lines | What It Does |
+|-------|-------|-------------|
+| [docker-selfhost](docker-selfhost/SKILL.md) | 134 | Docker Compose generation, TrueNAS SCALE, reverse proxy, self-hosted service stacks |
+| [truenas-ops](truenas-ops/SKILL.md) | 355 | ZFS, TrueNAS API scripting, dataset management, migration, replication, backup/restore |
+| [proxmox-k3s-infra](proxmox-k3s-infra/SKILL.md) | 194 | Proxmox VE, VMs, LXC, GPU passthrough, K3s clusters, Helm, GitOps with FluxCD/ArgoCD |
+| [deploy-pipeline](deploy-pipeline/SKILL.md) | 423 | SSH/rsync deploy scripts (bash + PowerShell), secrets management, Dockge, rollback strategies |
+| [infrastructure-as-code](infrastructure-as-code/SKILL.md) | 265 | Terraform/OpenTofu, Ansible, state management, modules, roles, Terraform+Ansible handoff |
+| [llm-inference-stack](llm-inference-stack/SKILL.md) | 234 | Ollama, vLLM, NVIDIA NIM, LiteLLM routing, VRAM sizing, quantization, multi-node topology |
+| [service-integration](service-integration/SKILL.md) | 360 | n8n, Node-RED, message queues, notification pipelines, Traefik, Uptime Kuma, cron patterns |
+
+### Software Engineering
+
+| Skill | Lines | What It Does |
+|-------|-------|-------------|
+| [full-sdlc](full-sdlc/SKILL.md) | 242 | Requirements through production — scaffolding, branching, testing, CI/CD, release management |
+| [code-reviewer](code-reviewer/SKILL.md) | 205 | Systematic review: correctness, security, edge cases, performance, Python/JS/Go/Bash patterns |
+| [cicd-pipeline](cicd-pipeline/SKILL.md) | 344 | GitHub/Forgejo Actions, self-hosted runners, build caching, container registries, release automation |
+| [github-workflow](github-workflow/SKILL.md) | 144 | Repo scaffolding, branch strategies, PR management, GitHub Actions, release workflows |
+| [testing-framework](testing-framework/SKILL.md) | 374 | pytest, Jest/Vitest, Playwright, k6 load testing, mocking, fixtures, CI integration, debugging flaky tests |
+| [database-architecture](database-architecture/SKILL.md) | 202 | Schema design, indexing, EXPLAIN ANALYZE, ORMs, migrations, connection pooling, replication, PostgreSQL ops |
+| [api-integration](api-integration/SKILL.md) | 502 | REST/GraphQL/WebSocket design, OAuth/JWT, resilience patterns (retry, circuit breaker), webhooks |
+
+### AI & Machine Learning
+
+| Skill | Lines | What It Does |
+|-------|-------|-------------|
+| [agentic-architecture](agentic-architecture/SKILL.md) | 279 | Agent design patterns (ReAct, multi-agent), RAG pipelines, tool use, guardrails, evaluation |
+| [mcp-server-dev](mcp-server-dev/SKILL.md) | 345 | Build MCP servers (FastMCP + TypeScript), tool design, transports, Docker packaging, federation |
+| [training-pipeline](training-pipeline/SKILL.md) | 237 | LoRA/QLoRA fine-tuning, data prep, hyperparameters, DeepSpeed, autonomous training loops, MLflow |
+| [federated-memory](federated-memory/SKILL.md) | 212 | Agent memory (working/recall/archival), vector stores, federation model, sync, graph knowledge |
+| [ai-skills-dev](ai-skills-dev/SKILL.md) | 175 | Skill development lifecycle, prompt engineering, agent architecture, cross-platform portability |
+
+### Security & Operations
+
+| Skill | Lines | What It Does |
+|-------|-------|-------------|
+| [security-reviewer](security-reviewer/SKILL.md) | 314 | OWASP Top 10, container hardening, SSH/firewall, TLS, secrets management, scanning pipelines |
+| [observability-sre](observability-sre/SKILL.md) | 478 | Prometheus, Grafana, Loki, OpenTelemetry, alerting philosophy, SLI/SLO, incident response, runbooks |
+
+### Data & Intelligence
+
+| Skill | Lines | What It Does |
+|-------|-------|-------------|
+| [data-engineering](data-engineering/SKILL.md) | 282 | ETL/ELT pipelines, pandas/polars/DuckDB, data validation, file formats, cleaning, orchestration |
+| [sigint-osint-feeds](sigint-osint-feeds/SKILL.md) | 280 | APRS, ADS-B, USGS, NOAA, GDELT, RSS aggregation, satellite tracking, PostGIS, worker patterns |
+| [archivebox-knowledge](archivebox-knowledge/SKILL.md) | 172 | Web archival, Paperless-NGX, content extraction, summarization pipelines, knowledge base integration |
+| [deep_research](deep_research/SKILL.md) | 29 | Source-grounded web research with triangulation, confidence scoring, and citation |
+
+### Web & Frontend
+
+| Skill | Lines | What It Does |
+|-------|-------|-------------|
+| [web-performance-a11y](web-performance-a11y/SKILL.md) | 193 | Core Web Vitals, asset optimization, WCAG 2.1/2.2 AA compliance, Lighthouse, SEO |
+| [frontend_design_ux_enforcement.md](frontend_design_ux_enforcement.md/SKILL.md) | 34 | Design systems, Tailwind v4, semantic HTML, accessibility audits, mobile-first patterns |
+| [browser-automation](browser-automation/SKILL.md) | 273 | Playwright, scraping patterns, anti-bot handling, e2e testing, page monitoring |
+
+### Productivity & Communication
+
+| Skill | Lines | What It Does |
+|-------|-------|-------------|
+| [content-strategy](content-strategy/SKILL.md) | 193 | Technical writing, READMEs, blog posts, API docs, SEO, email, documentation systems |
+| [productivity-automation](productivity-automation/SKILL.md) | 156 | Cron, batch workflows, data transformation, monitoring, backup automation, templates |
+| [google_workspace_assistant](google_workspace_assistant/SKILL.md) | 32 | Gmail, Calendar, Sheets, Drive automation with drafting-first workflow |
+
+### Meta / Reasoning
+
+| Skill | Lines | What It Does |
+|-------|-------|-------------|
+| [project_orchestrator](project_orchestrator/SKILL.md) | 46 | Multi-agent orchestration — DAG task decomposition, delegation, checkpointing |
+| [sequential_thinking](sequential_thinking/SKILL.md) | 33 | Structured reasoning trees, root cause analysis, architecture review, decision matrices |
+| [repo_auditor](repo_auditor/SKILL.md) | 47 | Repository health audit — structure, docs, links, dependencies, AI-readiness |
+| [ham-radio-network](ham-radio-network/SKILL.md) | 140 | Antenna math, CHIRP CSV, DMR codeplug, FT8/APRS, AREDN mesh, VLAN/firewall design |
+
+---
+
+## What Makes These Different
+
+**Depth over breadth.** Each skill is a focused engineering reference, not a feature list. Here's what you get inside a typical skill:
+
+- Decision frameworks ("when to use X vs Y, and why")
+- Practical code examples (Python, TypeScript, bash, YAML) you can use immediately
+- Architecture patterns with tradeoff analysis
+- Configuration templates with explanations
+- Troubleshooting tables mapping symptoms to fixes
+- Tool comparisons with honest assessments
+
+**Universal, not personal.** Every skill uses placeholders (`<NAS_IP>`, `<API_KEY>`, `<POOL_NAME>`) and explains patterns that work across any setup. No hardcoded infrastructure.
+
+**Principles over procedures.** Instead of "here's how to configure Stripe," you get "here's how to build resilient API integrations" — so the LLM can apply the pattern to any service.
+
+---
+
+## Skill Anatomy
 
 ```
 skill-name/
-├── SKILL.md          # Required: trigger description + instructions
-├── scripts/          # Optional: helper scripts
-├── references/       # Optional: supplemental docs
-└── assets/           # Optional: templates, configs
+├── SKILL.md          # Required: YAML frontmatter + markdown instructions
+├── scripts/          # Optional: helper scripts for deterministic tasks
+├── references/       # Optional: supplemental documentation
+└── assets/           # Optional: templates, configs, icons
 ```
 
+The YAML frontmatter controls when the skill activates:
+
+```yaml
 ---
+name: docker-selfhost
+description: "Use this skill whenever the user wants to work with Docker,
+  Docker Compose, containers, TrueNAS Scale, self-hosted services..."
+---
+```
 
-## References in This Repo
-
-### [claude_capabilities_catalog](claude_capabilities_catalog.md)
-**Reference for all available tools, MCPs, skills, and triggers currently in Claude.**
-
-### [ChatGPT_Capabilities_Catalog](chatgpt_capabilities_catalog.md)
-**ChatGPT Capabilities Catalog with available tools, MCPs, skills, and triggers.**
-
-### [gemini_capabilities_catalog](gemini_capabilities_catalog.md)
-**Gemini capabilities catalog with available tools, MCPs, skills, and triggers.**
-
-### [cross_agent_skills](cross_agent_skills.md)
-**Cross-Agent Skills & Capabilities Audit Prompt to generate a comparable capabilities catalog.**
-
-
-## Skills in This Repo
-
-### [ai-skills-dev](ai-skills-dev/SKILL.md)
-**Design, build, and test AI skills and agent workflows.**
-
-Covers the full lifecycle of skill development: writing effective trigger descriptions, prompt engineering principles, agent architecture patterns (single agent, orchestrator/worker, pipeline, evaluator loop), cross-platform portability, and publishing skills as `.skill` files or GitHub repos. Includes testing methodology from quick vibe checks to formal eval pipelines.
-
-**Triggers on:** skill development, prompt engineering, agent design, MCP development, LLM fine-tuning, RAG, embeddings, AI workflow design.
+The markdown body is the knowledge the LLM reads when the skill triggers. Write it like you're briefing a smart colleague who needs context, not step-by-step hand-holding.
 
 ---
 
-### [docker-selfhost](docker-selfhost/SKILL.md)
-**Generate and manage Docker Compose stacks for self-hosted services.**
+## Cross-Platform Reference Catalogs
 
-Produces complete, production-ready `docker-compose.yml` and `.env.example` files for self-hosted deployments. Covers TrueNAS Scale-specific constraints, reverse proxy integration (Traefik, nginx proxy manager, Cloudflare tunnels), network isolation patterns, volume/permission management, common service stacks (media, productivity, home automation, dev tools), migration from cloud to self-hosted, and backup strategy.
+Bonus: capabilities catalogs for comparing what each AI platform can do.
 
-**Triggers on:** docker, docker-compose, TrueNAS, self-hosted, homelab, reverse proxy, container troubleshooting, any commonly self-hosted service name (Jellyfin, Nextcloud, Gitea, etc.).
-
----
-
-### [github-workflow](github-workflow/SKILL.md)
-**Automate GitHub repository management and CI/CD workflows.**
-
-Provides structured workflows for repository scaffolding (README, .gitignore, issue templates, PR templates), branch strategy selection (trunk-based, GitHub Flow, Git Flow), PR creation and review using GitHub MCP tools, issue triage and labeling, and GitHub Actions CI/CD pipeline generation. Covers Docker build/push pipelines, release automation, and compound operations like search-fix-PR.
-
-**Triggers on:** GitHub, git, pull requests, issues, CI/CD, GitHub Actions, branch management, repo setup, code review.
-
----
-
-### [ham-radio-network](ham-radio-network/SKILL.md)
-**Amateur radio calculations, programming, and home network infrastructure.**
-
-Handles antenna design math (dipole, vertical, Yagi, coax loss, SWR/return loss), link budget calculations, repeater offset standards, CHIRP CSV generation for radio programming, DMR codeplug basics, digital mode setup (FT8/WSJT-X, APRS, Winlink), AREDN mesh networking, and home network design (VLAN layout, firewall rules, DNS architecture, subnet planning).
-
-**Triggers on:** ham radio, amateur radio, HF/VHF/UHF, antenna, repeater, APRS, DMR, FT8, SDR, CHIRP, AREDN, mesh network, VLAN design, home network infrastructure.
-
----
-
-### [productivity-automation](productivity-automation/SKILL.md)
-**Build scheduled tasks, batch file workflows, and personal automation pipelines.**
-
-Covers cron expression reference and scheduled task creation, self-contained task prompt writing, batch file rename/convert/organize operations, data transformation pipelines (CSV, JSON, logs), monitoring and alerting patterns (service health, disk space, SSL expiry, container status), backup automation with the 3-2-1 rule, and recurring workflow templates (daily summary, weekly cleanup, file watch pattern).
-
-**Triggers on:** automate, schedule, recurring, batch files, organize, backup, monitor, cron, daily/weekly tasks, file processing, data transformation.
-
----
-
-### [deep_research](deep_research/SKILL.md)
-**Web research, fact-grounding, and sourced technical analysis.**
-
-Eliminates hallucinations by grounding every claim in real-world data. Enforces a structured research protocol: query expansion into 3-5 sub-queries, source diversity across at least 3 domains, recency filtering (18 months for tech), and triangulation requiring two independent sources before marking a fact "Confirmed." Supports market analysis, spec verification, literature reviews, and OSINT fusion. Outputs include a confidence score, hyperlinked source list, and TL;DR synthesis.
-
-**Triggers on:** research, search, find, check, latest news, documentation, specs, comparison, who is, what is the best, current trends, citations, links.
-
----
-
-### [sequential_thinking](sequential_thinking/SKILL.md)
-**Structured reasoning framework for complex architecture, debugging, and decisions.**
-
-Forces exploration of a reasoning tree before answering — deconstructing requirements into atomic constraints, branching into optimal vs. fast paths, validating against edge cases, and synthesizing a justified recommendation. Includes a root cause analysis workflow for debugging (observation → history → hypothesis → isolation). Supports architectural review, decision matrices, and dependency mapping.
-
-**Triggers on:** why, how should I approach, debug, architecture, logic, plan, strategy, complex, broken, root cause, analyze, tasks with more than 5 dependencies.
-
----
-
-### [google_workspace_assistant](google_workspace_assistant/SKILL.md)
-**Automate Gmail, Calendar, Google Sheets, and Drive via Google Workspace MCP tools.**
-
-Bridges raw data and professional communication across the GWS ecosystem. Enforces a drafting-first workflow (never sends without explicit confirmation), context retrieval from prior email threads before composing, and scheduling rules (15-minute transition buffers, purpose/agenda required on all invites). Supports inbox triage, report-to-Sheets sync, and daily briefing generation from Calendar and Gmail.
-
-**Triggers on:** email, Gmail, draft, inbox, calendar, meeting, schedule, appointment, spreadsheet, Sheets, Google Docs, Drive, sync data, send report, check availability, organize my day.
-
----
-
-### [frontend_design_ux_enforcement.md](frontend_design_ux_enforcement.md/SKILL.md)
-**UI/UX development, design system enforcement, and accessibility audits.**
-
-Enforces a "No-Average" design philosophy: high-contrast typography scales, functional color palettes with a brand accent, and whitespace-first hierarchy on an 8px grid. Generates semantic HTML5/JSX with proper Next.js client/server separation, Tailwind v4 styling with `@theme` tokens, and full A11y compliance (ARIA labels, 4.5:1 contrast, keyboard navigation). Supports design audits, theme injection into `globals.css`, and mobile-first refactors.
-
-**Triggers on:** CSS, Tailwind, React, component, styling, UI, UX, responsive, mobile-first, accessibility, ARIA, Shadcn, Framer Motion, animation, layout, grid, flexbox, make it look better, fix the alignment, build a landing page.
-
----
-
-### [project_orchestrator](project_orchestrator/SKILL.md)
-**Multi-agent project orchestration — decompose, delegate, and coordinate across skills.**
-
-Acts as the central "Brain" for complex missions. Breaks high-level goals into a directed acyclic graph (DAG) of tasks, identifies dependencies, delegates to specialized skills with minimal context passing, checkpoints state after each completion, and synthesizes final delivery. Enforces a no-loop rule (halts after two agent hand-offs without progress) and tracks cost awareness by preferring local tools over expensive research calls.
-
-**Triggers on:** manage project, orchestrate, coordinate, start new build, full stack plan, integrate skills, workflow design, agent hand-off, multi-step mission.
-
----
-
-### [repo_auditor](repo_auditor/SKILL.md)
-**Repository health audit — structure, documentation, links, and AI-readiness.**
-
-Evaluates a local or remote repository across four layers: structural integrity (README, LICENSE, .gitignore, llms.txt, CI/CD scaffolding), content quality (stale docs, clarity, naming consistency), link and dependency integrity (external URL 404 checks, internal path validation, version pinning), and AI-readiness (SKILL.md frontmatter validation, entrypoint documentation). Outputs an executive summary, categorized findings, and a prioritized action plan of quick vs. strategic fixes.
-
-**Triggers on:** audit repo, check repository, is this repo clean, review structure, missing files, broken links, repo best practices, check README, prepare for release.
+| Catalog | Description |
+|---------|-------------|
+| [claude_capabilities_catalog.md](claude_capabilities_catalog.md) | All available tools, MCPs, skills, and triggers in Claude |
+| [chatgpt_capabilities_catalog.md](chatgpt_capabilities_catalog.md) | ChatGPT equivalent capabilities |
+| [gemini_capabilities_catalog.md](gemini_capabilities_catalog.md) | Gemini capabilities |
+| [cross_agent_skills.md](cross_agent_skills.md) | Audit prompt to generate a comparable catalog for any platform |
 
 ---
 
 ## Installation
 
-Copy any skill directory into your Claude Code skills folder:
-
-```bash
-# Typically:
-~/.claude/skills/skill-name/
-```
-
-Or install the full collection:
-
+### Full Collection
 ```bash
 git clone https://github.com/drewid74/ai_skills.git ~/.claude/skills/ai_skills
 ```
 
-> Check your Claude Code version's skill discovery path — it may vary.
+### Cherry-Pick Skills
+```bash
+# Copy just the skills you want
+cp -r ai_skills/docker-selfhost ~/.claude/skills/
+cp -r ai_skills/security-reviewer ~/.claude/skills/
+```
+
+### Verify
+Skills appear automatically once they're in your skills directory. The LLM reads the frontmatter `description` field to decide when to invoke each skill.
+
+> Skill directory paths vary by tool. For Claude Code, the default is `~/.claude/skills/`. Check your tool's documentation for the correct location.
+
+---
 
 ## Contributing
 
-Skills are plain markdown. To add or improve one:
+Skills are plain markdown. The barrier to entry is low:
+
 1. Fork the repo
-2. Edit or add a `SKILL.md` following the structure in [ai-skills-dev](ai-skills-dev/SKILL.md)
-3. Open a PR with example prompts that validate the trigger description
+2. Create a directory with a `SKILL.md` file (use [ai-skills-dev](ai-skills-dev/SKILL.md) for the template)
+3. Write 200-500 lines of domain knowledge with code examples and troubleshooting
+4. Open a PR with 2-3 example prompts that validate your trigger description
+
+Quality bar: if a developer with 5 years of experience would learn something from your skill, it belongs here. If it's just paraphrasing documentation, it doesn't.
+
+---
+
+## License
+
+MIT — use these skills however you want, commercially or otherwise.
