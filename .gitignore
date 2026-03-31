@@ -1,0 +1,26 @@
+# Environment / Secrets
+.env
+.env.local
+*.key
+*.pem
+*.p12
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Build artifacts
+node_modules/
+dist/
+build/
+
+# Logs
+*.log
