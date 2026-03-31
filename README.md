@@ -1,6 +1,6 @@
 # AI Skills — Functional Skill Framework
 
-A collection of reusable Claude Code skills covering common technical workflows. Each skill is a self-contained instruction set that teaches Claude how to perform a specific domain of tasks reliably and consistently.
+A collection of reusable skills files covering common (and not so common) technical workflows. Each skill is a self-contained instruction set that teaches your agents how to perform a specific domain of tasks reliably and consistently.
 
 ## What Is a Skill?
 
