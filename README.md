@@ -1,9 +1,10 @@
-# AI Skills — 35+ Deep Domain Skills for Claude Code, Cursor, Codex & Beyond
+# AI Skills — 35 Domain Skills + 12 Super Agents for Claude Code, Cursor, Codex & Beyond
 
-> **Not 1,000 shallow templates. 35 skills that actually teach your AI how to think about a domain.** Each skill is 200-500 lines of battle-tested patterns, real code examples, decision frameworks, and troubleshooting guides — the kind of knowledge that turns a generic LLM into a domain expert. (AKA - I've learned from my mistakes and repetition)
+> **Not 1,000 shallow templates. 35 focused skills + 12 domain-owning super agents that actually teach your AI how to think.** Each skill is 200-500 lines of battle-tested patterns, real code examples, decision frameworks, and troubleshooting guides. Super agents consolidate multiple skills into 700-1,200 line domain specialists that handle entire workflows end-to-end. (AKA - I've learned from my mistakes and repetition)
 
 [![Skills](https://img.shields.io/badge/skills-35-blue)]()
-[![Lines of Knowledge](https://img.shields.io/badge/lines-7%2C928-green)]()
+[![Super Agents](https://img.shields.io/badge/super_agents-12-purple)]()
+[![Lines of Knowledge](https://img.shields.io/badge/lines-19%2C207-green)]()
 [![License](https://img.shields.io/badge/license-MIT-yellow)]()
 
 ---
@@ -32,6 +33,8 @@ cp -r ai_skills/docker-selfhost ~/.claude/skills/
 ```
 
 Works with Claude Code, Cursor, Codex CLI, Windsurf, and any tool that reads `SKILL.md` files.
+
+> **Super agents vs. individual skills:** Super agents are self-contained — they don't depend on the skills they absorb. Install just the super agents you want, just the individual skills, or both. They live side-by-side with no conflicts.
 
 ---
 
@@ -111,6 +114,54 @@ Works with Claude Code, Cursor, Codex CLI, Windsurf, and any tool that reads `SK
 | [sequential_thinking](sequential_thinking/SKILL.md) | 33 | Structured reasoning trees, root cause analysis, architecture review, decision matrices |
 | [repo_auditor](repo_auditor/SKILL.md) | 47 | Repository health audit — structure, docs, links, dependencies, AI-readiness |
 | [ham-radio-network](ham-radio-network/SKILL.md) | 140 | Antenna math, CHIRP CSV, DMR codeplug, FT8/APRS, AREDN mesh, VLAN/firewall design |
+
+---
+
+## Super Agents — Domain-Owning Specialists
+
+Super agents consolidate multiple narrow skills into broad domain experts that handle entire workflows end-to-end. They absorb all knowledge from their constituent skills, add new capabilities, and explain the WHY behind every pattern. **The original 35 skills remain untouched** — use super agents when you want one specialist to own a whole domain, or individual skills when you want focused depth on a single topic.
+
+### Infrastructure & Platform
+
+| Super Agent | Lines | Absorbs | What It Does |
+|-------------|-------|---------|-------------|
+| [homelab-commander](homelab-commander/SKILL.md) | 1,154 | docker-selfhost, truenas-ops, proxmox-k3s-infra, deploy-pipeline | Full homelab infrastructure: Docker Compose stacks, TrueNAS storage, Proxmox VMs, K3s clusters, cross-platform migration, disaster recovery, network topology visualization, DNS management, blue-green deployments, FluxCD GitOps, VLAN configuration |
+| [sre-operations-lead](sre-operations-lead/SKILL.md) | 1,038 | observability-sre, productivity-automation | System reliability ownership: Prometheus/Grafana/Loki/OpenTelemetry observability, runbook generation, incident command, SLI/SLO error budgets, alert tuning, capacity planning, automated remediation, on-call rotation design, backup automation (rsync, restic, 3-2-1 rule), ELK/EFK stack alternatives, APM |
+
+### Software & DevOps
+
+| Super Agent | Lines | Absorbs | What It Does |
+|-------------|-------|---------|-------------|
+| [devops-engineer](devops-engineer/SKILL.md) | 1,236 | cicd-pipeline, github-workflow, infrastructure-as-code | Complete delivery pipeline: CI/CD (GitHub Actions, Forgejo, self-hosted runners), release management (semantic versioning, changelogs), IaC (Terraform/OpenTofu, Ansible), secrets lifecycle (Vault, rotation, leak detection), dependency auditing, PR review, git worktree management |
+| [software-architect](software-architect/SKILL.md) | 997 | full-sdlc, code-reviewer, database-architecture, repo_auditor | Full-stack architecture: requirements through production, code quality gates, schema design and optimization (PostgreSQL, pgvector, VACUUM), migration planning, ADR management, tech debt tracking, monorepo navigation, codebase onboarding |
+| [quality-test-engineer](quality-test-engineer/SKILL.md) | 1,060 | testing-framework, web-performance-a11y | Comprehensive QA: test architecture (unit/integration/E2E/load with pytest, Jest, Playwright, k6), contract testing (Pact), property-based and mutation testing, Core Web Vitals optimization, WCAG accessibility compliance, visual regression, chaos engineering, HTTP/2-3, Brotli, Testcontainers |
+
+### AI & Machine Learning
+
+| Super Agent | Lines | Absorbs | What It Does |
+|-------------|-------|---------|-------------|
+| [ai-systems-architect](ai-systems-architect/SKILL.md) | 913 | agentic-architecture, mcp-server-dev, federated-memory, ai-skills-dev | End-to-end AI systems: agent workflow design (ReAct, Plan-and-Execute, multi-agent), MCP server scaffolding and Docker packaging, RAG pipeline architecture, federated memory, skill development lifecycle, eval harness building, cost/latency optimization |
+| [ml-engineer](ml-engineer/SKILL.md) | 819 | training-pipeline, llm-inference-stack | Complete ML pipelines: fine-tuning (LoRA/QLoRA/full with PEFT/bitsandbytes), DPO/RLHF alignment, distributed training (DeepSpeed stages 1-3, FSDP), inference deployment (vLLM, Ollama, SGLang, TGI), quantization advising, VRAM calculators, embedding models for RAG, dataset curation, experiment comparison |
+
+### Integration & Security
+
+| Super Agent | Lines | Absorbs | What It Does |
+|-------------|-------|---------|-------------|
+| [api-integration-engineer](api-integration-engineer/SKILL.md) | 879 | api-integration, service-integration, browser-automation | Unified integrations: REST/GraphQL/WebSocket/gRPC API design, OAuth2/PKCE/JWT auth, resilience patterns (retry, circuit breaker, bulkhead), service orchestration (n8n, Node-RED), notification services (Ntfy, Gotify, Apprise), reverse proxy (Traefik, Cloudflare Tunnels), Playwright browser automation, ethical scraping |
+| [security-compliance-officer](security-compliance-officer/SKILL.md) | 839 | security-reviewer | Security audit framework: OWASP Top 10 (injection, XSS, CSRF, SSRF), container image hardening, SSH/firewall configuration, secrets management (Vault, SOPS), SSL/cert lifecycle, CIS benchmarks, SAST/DAST tools (CodeQL, Semgrep, ZAP), supply chain security (SBOM, Sigstore, SLSA), incident forensics, dependency CVE scanning |
+
+### Intelligence & Frontend
+
+| Super Agent | Lines | Absorbs | What It Does |
+|-------------|-------|---------|-------------|
+| [intelligence-analyst](intelligence-analyst/SKILL.md) | 844 | sigint-osint-feeds, archivebox-knowledge, deep_research | Intelligence platform: multi-source OSINT fusion (APRS, ADS-B, AIS vessel tracking, GDELT, USGS, NOAA), threat correlation with STIX/TAXII/OpenCTI, knowledge graph construction, web archival (ArchiveBox, FlareSolverr), source credibility scoring, automated briefing generation, satellite tracking (SGP4), RF signal decoding |
+| [frontend-ux-engineer](frontend-ux-engineer/SKILL.md) | 1,098 | frontend_design_ux_enforcement, content-strategy, google_workspace_assistant | UI/UX ownership: design system enforcement (Tailwind v4, Shadcn/Radix, Magic UI), "No-Average Rule" aesthetics, accessibility audits, technical content strategy (READMEs, ADRs, changelogs, SEO), brand voice engine, Google Workspace MCP integration (Gmail, Calendar, Sheets), documentation platforms (MkDocs, Docusaurus) |
+
+### Meta / Orchestration
+
+| Super Agent | Lines | Absorbs | What It Does |
+|-------------|-------|---------|-------------|
+| [mission-control](mission-control/SKILL.md) | 402 | project_orchestrator, sequential_thinking, ham-radio-network | Executive orchestration layer: multi-agent routing with cost-aware delegation, DAG task decomposition, conflict resolution with evidence-based arbitration, reasoning audit trails (branching, validation, RCA), task registry tracking, ham radio calculator (antenna math, CHIRP CSV, DMR codeplug, FT8/APRS, AREDN mesh, VLAN/firewall/DNS design) |
 
 ---
 
