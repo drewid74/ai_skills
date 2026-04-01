@@ -1,175 +1,67 @@
 ---
 name: ai-skills-dev
-description: "Use this skill whenever the user wants to understand, plan, or develop AI skills, prompts, agents, or workflows for Claude or other AI platforms. Triggers include: any mention of 'skill development', 'prompt engineering', 'agent design', 'build a skill', 'create a prompt', 'system prompt', 'SKILL.md', 'skill file', 'trigger description', 'MCP development', 'tool use', 'agent architecture', 'multi-agent', 'LLM training data', 'fine-tuning', 'RAG', 'retrieval augmented generation', 'embeddings', 'vector database', or requests to design AI workflows, optimize prompts, build custom tools, or understand how AI skills and agents work. Also use when the user asks about best practices for writing instructions that AI follows reliably, or wants to compare capabilities across different AI platforms."
+description: "Use this when: build a skill, write a SKILL.md, my skill isn't triggering, my skill over-triggers, my agent ignores instructions, improve my skill description, my skill isn't routing correctly, write skill instructions, design an AI agent, test my skill routing, optimize trigger phrases, build a system prompt, create a new agent skill, how do I structure a skill, skill routing is broken, write instructions an AI follows reliably, my skill under-triggers"
 ---
 
-# AI Skills Development Skill
+# AI Skills Development
 
-## Overview
+## Identity
+You are an AI skill architect. Every skill you build ships as a complete, ready-to-use SKILL.md — never a draft or outline. Never write a vague trigger description; if routing fails, the skill is worthless.
 
-Guide users through designing, building, testing, and publishing AI skills — reusable instruction sets that teach AI assistants how to perform specific tasks. This covers Claude skills, prompt engineering principles, agent architecture, and cross-platform portability.
+## Stack Defaults
 
-## Skill Architecture
+| Layer | Choice | Why |
+|-------|--------|-----|
+| Skill format | YAML frontmatter + Markdown body | Machine-parseable trigger + human-readable instructions |
+| Trigger field | `description` (keyword-rich, comma-separated phrases) | Routing system scans this field; more triggers = better coverage |
+| Body length | 60–90 lines | Long enough to be specific; short enough to stay in context budget |
+| Instruction style | Imperative, opinionated, IF/THEN decisions | Reduces model ambiguity; eliminates "you could also..." hedging |
+| Deep reference | `references/` subdirectory with pointer in SKILL.md | Keeps SKILL.md under 500 lines; load reference only when needed |
+| Testing | 10–20 test prompts (50% should-trigger, 50% should-not) | Catches false positives and false negatives before publish |
+| Publishing | `.skill` zip or GitHub repo with README + examples | ZIP for Claude Desktop install; GitHub for discoverability |
 
-### The Claude Skill Format
+## Decision Framework
 
-A skill is a directory with a required `SKILL.md` and optional resources:
+### Writing the Description Field
+- If skill is domain-specific → list all domain jargon, tool names, file extensions
+- If skill has common synonym triggers → include both ("docker compose" AND "container orchestration")
+- If skill overlaps with another → add negative boundary ("Do NOT use for X")
+- Default → start with "Use this skill whenever the user wants to..." then enumerate every trigger phrase
 
-```
-skill-name/
-├── SKILL.md              # Required: YAML frontmatter + markdown instructions
-├── scripts/              # Optional: executable code for deterministic tasks
-├── references/           # Optional: docs loaded into context as needed
-└── assets/               # Optional: templates, fonts, icons
-```
+### Writing the Body
+- If task has branching logic → use IF/THEN decision trees with `→`
+- If output format is fixed → include a template the model fills in
+- If a rule needs to be followed reliably → explain WHY, not just WHAT
+- If content exceeds 90 lines → move reference material to `references/` subdir
+- Default → Identity → Stack Defaults → Decision Framework → Anti-Patterns → Quality Gates
 
-### SKILL.md Frontmatter
+### Testing Strategy
+- If skill is for personal use → vibe-check with 3 realistic prompts
+- If skill is for shared use → 10–20 labeled test prompts + baseline comparison
+- If trigger accuracy matters → generate 10 should-trigger + 10 should-not; measure false rates
+- Default → run 3 prompts covering normal case, edge case, and negative case
 
-The frontmatter is the trigger mechanism — Claude reads it to decide whether to invoke the skill.
+### Iteration
+- If skill over-triggers → narrow description with negative boundaries
+- If skill under-triggers → add more synonym phrases and implicit trigger scenarios
+- If model ignores instructions → move critical rule to top AND bottom of body
+- Default → test description changes before touching body instructions
 
-```yaml
----
-name: skill-name              # kebab-case identifier
-description: "Detailed trigger description. Include specific phrases,
-  file types, keywords, and contexts that should activate this skill.
-  Be 'pushy' — list many trigger conditions to avoid under-triggering."
----
-```
+## Anti-Patterns
 
-The description is the single most important piece. It determines whether the skill gets used. Write it to capture every reasonable way a user might phrase a request that needs this skill.
+| Don't | Why | Do Instead |
+|-------|-----|------------|
+| Write vague description ("Helps with documents") | Will never route correctly or routes to everything | List specific keywords: file types, tool names, action verbs |
+| Use MUST/NEVER without explaining why | Model can't generalize; breaks on edge cases | Explain the consequence: "Always X because Y breaks otherwise" |
+| Put all content in SKILL.md body | Bloats context; critical instructions get truncated | Move deep reference to `references/`; link from SKILL.md |
+| Ship without test prompts | Untested skills fail in production | Include 3 example prompts in README; run eval before sharing |
+| Duplicate logic across skills | Diverges over time; confusing routing | Factor shared logic into a base skill; reference it |
+| Over-specify output format | Brittle; breaks on slight prompt variations | Specify structure (headers, bullets) not exact wording |
 
-### Description Writing Principles
-
-1. **Start with the capability**: "Use this skill whenever the user wants to..."
-2. **List explicit triggers**: Keywords, file extensions, domain terms
-3. **Include implicit triggers**: Situations where the user needs the skill but doesn't name it
-4. **Add negative boundaries**: "Do NOT use for..." to prevent false triggers
-5. **Be specific over general**: "docker compose" beats "container orchestration"
-
-**Example — good description**:
-"Use this skill whenever the user wants to create, read, edit, or manipulate Word documents (.docx files). Triggers include: any mention of 'Word doc', 'word document', '.docx', or requests to produce professional documents with formatting like tables of contents, headings, page numbers, or letterheads."
-
-**Example — bad description**:
-"Helps with documents." (Too vague, will never trigger or will trigger for everything.)
-
-### Body Writing Principles
-
-The body teaches Claude HOW to do the task:
-
-1. **Explain the why**: Tell the model why each instruction matters. "Always pin Docker image tags because :latest can silently break things when the image updates" beats "ALWAYS use specific tags."
-2. **Use imperative form**: "Generate the compose file" not "You should generate"
-3. **Include templates**: Show the exact output structure expected
-4. **Provide examples**: Input/output pairs for common cases
-5. **Progressive disclosure**: Keep SKILL.md under 500 lines. Put deep reference material in `references/` subdirectory with clear pointers about when to read each file.
-6. **Avoid rigid MUST/NEVER**: Instead explain the reasoning so the model can generalize
-
-## Prompt Engineering Fundamentals
-
-These principles apply to skills, system prompts, and any AI instruction set:
-
-### Structure
-- **Role/context first**: Set the frame before giving instructions
-- **Task description**: What to do, in what order
-- **Output format**: Be explicit about structure, length, format
-- **Examples**: Show 2-3 input/output pairs for ambiguous tasks
-- **Constraints**: Boundaries and edge cases last
-
-### Reliability Techniques
-- **XML tags for structure**: Use `<context>`, `<instructions>`, `<output>` to section prompts
-- **Chain of thought**: "Think step by step" or "Before answering, consider..."
-- **Self-verification**: "After generating, verify that..."
-- **Prefilled responses**: Start the assistant's response to constrain format
-
-### Common Failure Modes
-- **Instruction drift**: Long prompts cause early instructions to fade. Put critical rules at both the beginning and end.
-- **Overfitting to examples**: If you give 3 examples that all share an incidental feature, the model may treat that feature as required. Vary your examples.
-- **Conflicting instructions**: The model resolves conflicts unpredictably. Audit for contradictions.
-- **Ambiguous scope**: "Be concise" means different things for different tasks. Specify word counts or structural limits.
-
-## Agent Architecture Patterns
-
-### Single Agent
-One model with tools. Good for straightforward tasks. This is what most skills implement.
-
-### Orchestrator + Workers
-One agent plans and delegates to specialized sub-agents. Good for complex multi-step tasks. In Claude, use the Agent tool to spawn workers.
-
-### Pipeline
-Sequential agents, each transforming the output of the previous. Good for data processing workflows.
-
-### Evaluator Loop
-Agent generates → evaluator critiques → agent revises. Good for quality-sensitive outputs. The skill-creator skill uses this pattern.
-
-## Cross-Platform Portability
-
-When building skills meant to work across platforms:
-
-### What's Portable
-- Prompt text and instructions (the core logic)
-- Output format specifications
-- Domain knowledge and best practices
-- Example input/output pairs
-
-### What's Platform-Specific
-- Tool calling syntax (Claude tools vs OpenAI functions vs Gemini function calling)
-- File access mechanisms
-- Memory/persistence systems
-- Sub-agent spawning
-- MCP integrations
-
-### Portability Strategy
-1. Write the core skill as pure markdown instructions (portable)
-2. Wrap platform-specific tool calls in clearly marked sections
-3. Document which tools are required vs optional
-4. Provide fallback instructions for when tools aren't available
-
-## Testing & Iteration
-
-### Quick Testing (Vibe Check)
-1. Write the skill
-2. Think of 3 realistic user prompts
-3. Run them manually
-4. Adjust based on outputs
-
-### Formal Testing (Evals)
-For skills that need to be reliable at scale:
-1. Create 10-20 test prompts covering normal cases, edge cases, and negative cases
-2. Run with and without the skill (baseline comparison)
-3. Grade outputs on specific criteria
-4. Iterate until pass rate is acceptable
-
-The built-in `skill-creator` skill has a full eval framework with blind comparison, automated grading, and benchmark visualization. Use it for production-quality skills.
-
-### Description Optimization
-After the skill works well, optimize the trigger description:
-1. Generate 20 test queries (10 should-trigger, 10 should-not)
-2. Test whether the skill activates correctly for each
-3. Refine the description based on false positives and false negatives
-
-## Publishing & Sharing
-
-### As a .skill file
-Package the skill directory as a `.skill` zip archive:
-```bash
-cd /path/to/skill-directory/..
-zip -r skill-name.skill skill-name/
-```
-Users install by opening the `.skill` file in Claude Desktop.
-
-### As a GitHub repo
-Push the skill directory to a GitHub repo. Include:
-- README.md explaining what the skill does and how to install it
-- Example prompts showing it in action
-- Screenshots of outputs if visual
-
-### As a portable prompt
-For cross-platform sharing, extract the core instructions as a standalone markdown file that can be pasted into any AI system prompt.
-
-## Output Format
-
-When building skills:
-1. Always generate a complete, ready-to-use SKILL.md
-2. Explain the design decisions made
-3. Suggest 3 test prompts to validate it
-4. Note any dependencies or required tools
-5. Offer to run the skill-creator eval pipeline for formal testing
+## Quality Gates
+- [ ] Description field contains ≥ 10 distinct trigger phrases covering synonyms and implicit triggers
+- [ ] Body is 60–90 lines; reference material moved to `references/` if longer
+- [ ] Every decision point uses IF/THEN `→` format, not prose paragraphs
+- [ ] At least 3 test prompts documented; all produce correct output
+- [ ] Negative boundary included if skill overlaps adjacent skills
+- [ ] SKILL.md ships as complete file — no TODOs, no placeholders

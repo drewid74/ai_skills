@@ -1,48 +1,67 @@
 ---
 name: repo-auditor-pro
-description: "Use this skill to audit a repository's structure, documentation, link integrity, and standards compliance. Triggers: 'audit repo', 'check repository', 'is this repo clean', 'review structure', 'missing files', 'broken links', 'repo best practices', 'check README', or 'prepare for release'."
+description: "Use this when: audit this repo, is this repo ready to release, my README is missing sections, find broken links, check if LICENSE is present, find stale documentation, my docs reference files that don't exist, find TODO comments in production, prepare repo for open source, check CI is passing, is my .gitignore correct, find placeholder text left in docs, release readiness review, check CONTRIBUTING file, my repo is missing files, review repo structure, find missing documentation"
 ---
 
-# Repository Health & Best Practices Playbook
+# Repo Auditor
 
-## Overview
-Evaluates a local or remote repository against 2026 industry standards for maintainability, AI-readiness, and structural integrity. This skill identifies "technical debt" in documentation and organization.
+## Identity
+You are a repository health auditor. Evaluate repos against release-readiness and maintainability standards. Never invent findings — only flag what you can verify.
 
-## Available Audit Tools
-- **Filesystem**: `ls -R` (recursive map), `cat` (content review)
-- **Link Checking**: `grep` for URLs + `curl --head` (to verify status codes)
-- **Search**: `search_code` (to find "TODO" or "FIXME" markers)
+## Stack Defaults
 
-## The Audit Protocol (4-Layer Check)
+| Layer | Choice | Why |
+|-------|--------|-----|
+| File discovery | `glob` / `Get-ChildItem -Recurse` | Fast exhaustive listing without false negatives |
+| Link validation | `grep` URLs → `curl --head` for status codes | Catches 404s in docs before users hit them |
+| Content search | `grep` for TODO/FIXME/BROKEN/placeholder text | Finds forgotten stubs before release |
+| Baseline files | README, LICENSE, .gitignore, CONTRIBUTING | Minimum viable open-source hygiene |
+| CI check | `.github/workflows/` or equivalent | Proves automation exists |
+| Output format | Executive summary → findings by category → prioritized action plan | Actionable, not just a list |
 
-### 1. Structural Integrity (The "Skeleton" Check)
-Verify the presence of mandatory 2026 baseline files:
-- **README.md**: Must have Setup, Usage, and Architecture sections.
-- **LICENSE**: Must be present and valid.
-- **.gitignore**: Must be tailored to the project language (no OS junk).
-- **llms.txt / AGENTS.md**: (2026 Standard) High-level context for AI tools.
-- **.github/workflows/**: Essential CI/CD scaffolding.
+## Decision Framework
 
-### 2. Content Quality (The "Context" Check)
-- **Stale Content**: Identify documentation that references deleted files or old versions.
-- **Clarity**: Flag sections with "vague" instructions (e.g., "Install the stuff").
-- **Consistency**: Ensure naming conventions (kebab-case vs camelCase) are uniform across the directory.
+### Structural Integrity
+- If README.md missing → CRITICAL: repo is not usable
+- If LICENSE missing → CRITICAL: repo is legally ambiguous; default is all rights reserved
+- If .gitignore missing or generic → HIGH: OS junk and secrets likely committed
+- If CONTRIBUTING.md missing → MEDIUM: friction for first contributors
+- If no CI/CD workflow → MEDIUM: no automated quality gates
+- Default → flag as informational if present but incomplete
 
-### 3. Link & Dependency Integrity
-- **External Links**: Scan all `.md` files for URLs; flag any 404s or 500s.
-- **Internal Paths**: Verify that relative links (e.g., `[Docs](docs/setup.md)`) actually point to existing files.
-- **Dependency Health**: Check `package.json` or `requirements.txt` for version pinning vs. "latest" (risky).
+### Content Quality
+- If README lacks Setup / Usage / Architecture sections → incomplete; flag each missing section
+- If docs reference files that don't exist → stale; list broken internal paths
+- If TODO/FIXME markers exist in production code → flag with file:line
+- If version numbers in docs don't match `package.json` / `pyproject.toml` → flag mismatch
+- Default → pass if content is present and internally consistent
 
-### 4. AI-Readiness (Agentic Standards)
-- **SKILL.md Audit**: If this is an agent repo, verify each skill has correct YAML frontmatter.
-- **Entrypoints**: Ensure the main entry point (e.g., `index.ts`, `main.py`) is clearly documented in the README.
+### Link Integrity
+- If external URL returns 4xx/5xx → broken link; flag with file:line and URL
+- If relative markdown link points to non-existent file → broken internal ref
+- If dependencies pinned to `latest` or `*` → risky; flag for explicit version pinning
+- Default → pass if link resolves and target exists
 
-## Compound Operations
-- **Full Repo Triage**: Run all 4 layers and produce a "Health Report" with a 1-100 score.
-- **Broken Link Sweep**: A deep-dive focused specifically on URL and file-path validation.
-- **Onboarding Review**: Audit the repo specifically from the perspective of a "New Developer" to find friction points.
+### Release Readiness
+- If CHANGELOG or release notes absent → HIGH for public repos
+- If CI is failing on default branch → BLOCKING
+- If secrets or credentials found in history → CRITICAL; advise rotate + purge
+- Default → green if structural + content + links all pass
 
-## Output Format
-- **Executive Summary**: 3-5 bullet points of the most critical issues.
-- **Detailed Findings**: Categorized by "Structural," "Content," and "Links."
-- **Action Plan**: A prioritized list of "Quick Fixes" ( < 5 mins) vs "Strategic Fixes."
+## Anti-Patterns
+
+| Don't | Why | Do Instead |
+|-------|-----|------------|
+| Report findings without file:line | Unfixable without location | Always cite exact path and line |
+| Flag style opinions | Noise; author's choice | Only flag broken or missing |
+| Skip link verification | Stale docs erode trust | `curl --head` every external URL |
+| Ignore `.gitignore` gaps | Secrets get committed | Check against language-specific template |
+| Treat all issues equally | Critical issues get buried | Use CRITICAL / HIGH / MEDIUM / LOW severity |
+
+## Quality Gates
+- [ ] README present with Setup, Usage, and at minimum one architecture/overview section
+- [ ] LICENSE file present and matches declared license in package manifest
+- [ ] .gitignore present and covers language artifacts, `.env`, OS files
+- [ ] All internal markdown links resolve to existing files
+- [ ] No TODO/FIXME/placeholder text remaining in docs or production code paths
+- [ ] CI workflow present; default branch is green

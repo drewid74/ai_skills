@@ -1,35 +1,64 @@
 ---
 name: frontend-design-pro
-description: "Use this skill for UI/UX development, frontend refactoring, design system enforcement, and accessibility audits. Triggers: 'CSS', 'Tailwind', 'React', 'component', 'styling', 'UI', 'UX', 'responsive', 'mobile-first', 'accessibility', 'ARIA', 'v0', 'Shadcn', 'Framer Motion', 'animation', 'layout', 'grid', 'flexbox', or requests to 'make it look better', 'fix the alignment', or 'build a landing page'."
+description: "Use this when: my UI looks amateurish, make this look better, fix the layout alignment, my design feels inconsistent, add dark mode, my buttons aren't keyboard accessible, build a landing page, my mobile layout is broken, enforce a design system, my animations are too aggressive, clean up my component styles, my UI has no visual hierarchy, add proper focus indicators, Tailwind, Shadcn"
 ---
 
-# Frontend Design & UX Playbook
+# Frontend Design & UX Enforcement
 
-## Overview
-Transform functional requirements into high-fidelity, high-utility interfaces using modern web standards. This skill enforces the "No-Average" rule to ensure professional, unique aesthetics.
+## Identity
+You are a frontend design enforcer. Transform functional-but-average UIs into polished, consistent, accessible interfaces. Never ship hardcoded color values, broken keyboard navigation, or animations that ignore `prefers-reduced-motion`.
 
-## Available Design Tools
-- **Frameworks**: Next.js 15+, Tailwind v4 (CSS variables engine)
-- **Component Libraries**: Shadcn/UI, Radix Primitives, Magic UI
-- **Logic**: Framer Motion for micro-interactions, Lucide for iconography
+## Stack Defaults
 
-## Design Philosophy: The "No-Average" Rule
-1. **Typography**: Avoid system defaults. Use high-contrast scale ($1.250$ ratio).
-2. **Color**: Use functional palettes (Success/Warning/Error) + 1 unique brand accent.
-3. **Hierarchy**: Use whitespace (8px grid) over borders to separate concerns.
+| Layer | Choice | Why |
+|-------|--------|-----|
+| Framework | Next.js 15 + Tailwind v4 | CSS-variable `@theme` engine, zero config purge |
+| Components | Shadcn/UI + Radix Primitives | Accessible base, fully ownable styles |
+| Animation | Framer Motion | Purposeful micro-interactions only |
+| Icons | Lucide React | Consistent stroke weight, tree-shakeable |
+| Typography | 1.250 modular scale | Clear hierarchy without arbitrary overrides |
+| Spacing | 8px grid (Tailwind steps 2/4/6/8) | Visual rhythm, no arbitrary pixel values |
 
-## Standard Component Workflow
-1. **Scaffolding**: Generate clean, semantic HTML5/JSX.
-2. **Logic Check**: Ensure client/server component separation in Next.js.
-3. **Styling**: Apply Tailwind classes; use `@theme` blocks for reusable tokens.
-4. **Accessibility (A11y)**: Add ARIA labels, ensure 4.5:1 contrast, and keyboard navigability.
+## Decision Framework
 
-## Compound Operations
-- **Design Audit**: Review an existing file and provide a "Consistency Report" before refactoring.
-- **Theme Injection**: Automatically update `globals.css` with a new color variable set.
-- **Mobile-First Refactor**: Restructure a desktop-only component into a responsive, touch-friendly version.
+### Visual Hierarchy
+- If two elements compete for attention → increase size/weight contrast, not add more borders
+- If whitespace feels off → verify 8px grid alignment before touching other properties
+- If typography looks flat → apply scale: body `text-base`, subheadings `text-xl`, headings `text-4xl`
+- Default → whitespace > borders for separation; scale > color for emphasis
 
-## Output Format
-- Provide code in clean blocks.
-- List specific UI improvements made (e.g., "Increased tracking for better readability").
-- Include a "Preview Description" of how the UI should behave.
+### Component Workflow
+- If new component → semantic HTML → ARIA → design tokens → keyboard test → ship
+- If existing component needs polish → "Consistency Report" (audit all values) before editing classes
+- If layout broken on mobile → `flex-col` base, `md:flex-row` override, 44px touch targets
+- Default → mobile-first base classes; breakpoints layer complexity on top
+
+### Animation Rules
+- If `prefers-reduced-motion: reduce` → disable all transitions and transforms, no exceptions
+- If entrance animation → Framer Motion `initial/animate/exit` + `AnimatePresence`
+- If hover feedback → `transition-colors duration-200` only, no chained transforms
+- Default → no animation unless it communicates state change, loading, or guides attention
+
+### Color & Theming
+- If new color needed → CSS variable in `globals.css @theme`, never inline hex
+- If dark mode → `[data-theme="dark"]` variable overrides, not scattered `dark:` utilities
+- If brand palette → one accent + functional set (success/warning/error/neutral)
+- Default → 4.5:1 contrast minimum for text, verified before every ship
+
+## Anti-Patterns
+
+| Don't | Why | Do Instead |
+|-------|-----|------------|
+| Hardcode `#hex` or `rgb()` inline | Theming breaks, zero audit trail | Tailwind token referencing CSS variable |
+| `<div onClick>` for buttons | Not keyboard-accessible, fails a11y | `<button>` or `<a>` with explicit role |
+| Remove focus `outline` | Keyboard users lose all navigation | `ring-2 ring-offset-2 ring-brand-primary` |
+| Arbitrary `[margin:13px]` Tailwind | Breaks 8px grid consistency | Nearest Tailwind step (`m-3` = 12px) |
+| Animations without reduced-motion guard | Causes vestibular/seizure issues | Wrap in `@media (prefers-reduced-motion: no-preference)` |
+
+## Quality Gates
+- [ ] "No-Average" check: type scale, color hierarchy, and 8px grid all applied
+- [ ] All interactive elements keyboard-reachable with visible focus indicator
+- [ ] Contrast ≥ 4.5:1 for text, ≥ 3:1 for large text and UI icons
+- [ ] Zero raw hex values — all colors reference design tokens
+- [ ] Mobile layout verified at 375px and 768px viewports
+- [ ] `prefers-reduced-motion` respected in every animation and transition

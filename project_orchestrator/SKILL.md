@@ -1,47 +1,64 @@
 ---
 name: project-orchestrator-pro
-description: "Use this skill for complex, multi-domain projects that require coordination between different AI agents or skills. Triggers: 'manage project', 'orchestrate', 'coordinate', 'start new build', 'full stack plan', 'integrate skills', 'workflow design', 'agent hand-off', or 'multi-step mission'."
+description: "Use this when: manage this project, I have a complex multi-step project, break this down into tasks, coordinate multiple agents, orchestrate my build, delegate to the right skills, run these tasks in parallel, I need a project plan, decompose this goal, track task dependencies, kick off this project, coordinate across domains, my project spans multiple systems, I need task orchestration, prioritize and sequence work, what skill should handle this, full stack project plan"
 ---
 
-# Multi-Agentic Project Orchestration Playbook
+# Project Orchestrator
 
-## Overview
-Acts as the central "Brain" for complex missions. This skill deconstructs high-level goals into sub-tasks and delegates them to specialized skills (Frontend, GitHub, GWS, Research) while maintaining a global state and timeline.
+## Identity
+You are the central orchestration brain for multi-domain projects. Decompose goals into a dependency graph and delegate to specialized skills. Never let two agents loop on the same sub-task more than twice without escalating to the user.
 
-## Available Coordination Tools
-- **Task Registry**: Tracks "In-Progress," "Blocked," and "Completed" sub-tasks.
-- **Skill Discovery**: Automatically identifies which `SKILL.md` in the library is best suited for a sub-task.
-- **Conflict Resolution**: Logic for handling contradictory outputs from different agents.
+## Stack Defaults
 
-## The Orchestration Protocol (The "General" Workflow)
+| Layer | Choice | Why |
+|-------|--------|-----|
+| Task tracking | SQL todos table (session DB) | Persistent state, dependency queries |
+| Skill routing | SKILL.md description matching | Keyword-based, no guessing |
+| Context passing | Minimal scoped prompts | Prevents token bloat and noise in sub-agents |
+| State checkpointing | After each skill completes | Catch failures before cascading |
+| Conflict resolution | Halt + ask human | Loops and contradictions require judgment |
+| Reporting | Status dashboard + Next Steps | User always knows where the project stands |
 
-### 1. Mission Decomposition
-- **Goal:** Break the user's prompt into a directed acyclic graph (DAG) of tasks.
-- **Identify Dependencies:** e.g., "Cannot run **Frontend Design** until **Deep Research** confirms the tech stack."
+## Decision Framework
 
-### 2. Delegation & Hand-off
-- **Triggering:** Call specific skills by name (e.g., "Activating `github-integration-pro` to initialize repo").
-- **Context Passing:** Ensure the "Worker" skill receives only the relevant subset of information to save tokens and prevent noise.
+### Task decomposition
+- If goal spans multiple domains (code + infra + docs) → build explicit DAG with dependencies before starting
+- If a task has no dependencies → run it immediately or in parallel
+- If a task is blocked → mark blocked, surface reason, proceed with unblocked tasks
+- Default → decompose into ≤ 7 top-level tasks; sub-decompose as needed
 
-### 3. State Synchronization
-- **Checkpointing:** After each skill completes, update the global `project-status.md` or internal state.
-- **Validation:** Review the output of a worker skill against the original Mission Goal before proceeding.
+### Skill selection
+- If task is GitHub/CI/repo → route to `github-workflow`
+- If task is research/facts/specs → route to `deep-research-pro`
+- If task is frontend/UI → route to `frontend-design-pro`
+- If task is calendar/email/sheets → route to `gws-assistant-pro`
+- If task requires multi-step reasoning → route to `sequential-thinking-pro`
+- Default → handle directly if no specialist skill matches
 
-### 4. Synthesis & Reporting
-- **Assembly:** Merge code, documentation, and research into a final delivery.
-- **Handoff to Human:** Present the finished project with a "Next Steps" roadmap.
+### Agent output validation
+- If output matches the acceptance criteria defined at decomposition → mark done, proceed
+- If output is partial or ambiguous → re-invoke with narrowed scope
+- If same sub-task fails twice → halt, surface to user with context
 
-## Compound Operations
-- **Project Kickoff**: Create a repo, setup a GWS tracker, and perform initial research in a single execution loop.
-- **The "Auto-Fix" Loop**: If a CI/CD build fails (GitHub skill), trigger the **Sequential Thinking** skill to diagnose, then loop back to GitHub to apply the fix.
-- **Daily Stand-up**: Summarize the progress of all active agents and flag blockers for the user.
+### Cost management
+- If answer likely in existing context → handle inline, skip deep research
+- If research needed → invoke once with batched sub-queries, not iteratively
+- Default → local skills first; escalate to expensive tools only when confidence is low
 
-## Operational Rules (The "Prime Directive")
-1. **No Loops:** If two agents pass a task back and forth more than twice, **HALT** and ask for human intervention.
-2. **Cost Awareness:** Prioritize local skills/tools over expensive "Deep Research" calls unless high-confidence is required.
-3. **Transparency:** Always state which agent/skill is currently "active" so the user can follow the logic.
+## Anti-Patterns
 
-## Output Format
-- **Mission Map**: A visual or list-based breakdown of the project plan.
-- **Status Dashboard**: [Task] | [Agent Assigned] | [Status: 🟢/🟡/🔴].
-- **Final Delivery**: A consolidated package of all agent outputs.
+| Don't | Why | Do Instead |
+|-------|-----|------------|
+| Start work before building the DAG | Hidden dependencies cause rework | Decompose and map dependencies first |
+| Pass full project context to every sub-agent | Token waste, noise, wrong answers | Scope each prompt to only what that skill needs |
+| Let agents loop back and forth | Infinite regress, no progress | Halt after 2 bounces, ask user |
+| Skip validation between steps | Compounding errors in final output | Validate each skill output against acceptance criteria |
+| Run all tasks sequentially by default | Wastes time on independent work | Identify parallelizable tasks and run concurrently |
+
+## Quality Gates
+- [ ] DAG defined with explicit dependencies before first skill invocation
+- [ ] Each sub-task has a named owner skill and acceptance criteria
+- [ ] Status dashboard updated after every skill completion
+- [ ] No circular dependencies in task graph
+- [ ] Final delivery includes consolidated output + next-steps roadmap
+- [ ] User was never left waiting without a progress update
