@@ -1,10 +1,10 @@
-# AI Skills — 35 Lean Domain Skills for Claude Code, Cursor, Codex & Beyond
+# AI Skills — 43 Lean Domain Skills for Claude Code, Cursor, Codex & Beyond
 
-> **35 focused skills, each ~75 lines.** Every skill follows the same template: Identity → Stack Defaults → Decision Framework → Anti-Patterns → Quality Gates. Dense enough to be useful, lean enough not to bloat your context window.
+> **43 focused skills.** Core skills follow the same template: Identity → Stack Defaults → Decision Framework → Anti-Patterns → Quality Gates (~75 lines). Android reference skills are full implementation guides with working code patterns. Dense enough to be useful, lean enough not to bloat your context window.
 
-[![Skills](https://img.shields.io/badge/skills-35-blue)]()
-[![Lines](https://img.shields.io/badge/lines-2%2C531-green)]()
-[![Tokens](https://img.shields.io/badge/est._tokens-37K-orange)]()
+[![Skills](https://img.shields.io/badge/skills-43-blue)]()
+[![Lines](https://img.shields.io/badge/lines-2%2C531+-green)]()
+[![Tokens](https://img.shields.io/badge/est._tokens-37K+-orange)]()
 [![License](https://img.shields.io/badge/license-MIT-yellow)]()
 
 ---
@@ -117,6 +117,21 @@ Works with Claude Code, Cursor, Codex CLI, Windsurf, and any tool that reads `SK
 | [sequential_thinking](sequential_thinking/SKILL.md) | 62 | Root cause analysis, architecture review, structured decision-making |
 | [repo_auditor](repo_auditor/SKILL.md) | 67 | Repository health, docs quality, broken links, release readiness |
 | [ham-radio-network](ham-radio-network/SKILL.md) | 79 | Antenna math, CHIRP/DMR, FT8/APRS, AREDN mesh, VLAN/firewall design |
+
+### Android Mobile
+
+Full implementation reference skills with working Kotlin/Compose code patterns. Each covers the idiomatic approach, common pitfalls, and API-level caveats.
+
+| Skill | What It Does |
+|-------|-------------|
+| [android-auto](android-auto/SKILL.md) | Android Auto / Automotive OS: Car App Library templates, CarAppService/Session lifecycle, voice interaction, distraction optimization rules, navigation and POI templates, AAOS native targeting |
+| [android-ble-hardware](android-ble-hardware/SKILL.md) | BLE hardware integration via Nordic BLE library: UART/GATT service discovery, `callbackFlow` scanning, multi-device type detection, automatic reconnect, Android 12+ permission model, binary packet parsing |
+| [android-compose-realtime](android-compose-realtime/SKILL.md) | High-frequency real-time UI in Jetpack Compose: recomposition avoidance with granular state and `derivedStateOf`, Canvas-based gauges and sliding-window graphs, `StateFlow` → Compose at 25Hz+, performance profiling |
+| [android-foreground-service](android-foreground-service/SKILL.md) | Long-running foreground services for sensor/BLE/GPS/audio collection: Android 14+ `foregroundServiceType` enforcement, `START_STICKY` null-intent safety, intent-based IPC, source-priority fallback, clean shutdown |
+| [android-on-device-ml](android-on-device-ml/SKILL.md) | On-device ML: ML Kit (text recognition, object detection, pose), TensorFlow Lite custom models with GPU/NNAPI delegates, MediaPipe Tasks API, CameraX + ML pipeline, model asset delivery |
+| [android-security](android-security/SKILL.md) | Android security fundamentals: `EncryptedSharedPreferences`/`EncryptedFile`, KeyStore-backed key generation, `BiometricPrompt` + Credential Manager passkeys, OkHttp certificate pinning, Play Integrity API, R8 rules |
+| [android-telemetry-pipeline](android-telemetry-pipeline/SKILL.md) | High-frequency sensor pipeline (10–100Hz): hybrid Room + CSV/binary storage, `StateFlow` streaming to Compose ViewModel, atomic session lifecycle, telemetry normalization across BLE/GPS/IMU sources, post-session analysis |
+| [android-video-capture](android-video-capture/SKILL.md) | CameraX video and photo capture in Compose: lifecycle-aware camera setup, `VideoCapture` use case with MediaStore output, simultaneous preview + record + capture, camera selector, torch control, recording state management |
 
 ---
 
