@@ -98,7 +98,7 @@ Works with Claude Code, Cursor, Codex CLI, Windsurf, and any tool that reads `SK
 | Skill | Lines | What It Does |
 |-------|-------|-------------|
 | [web-performance-a11y](web-performance-a11y/SKILL.md) | 80 | Core Web Vitals, WCAG 2.1/2.2 AA, Lighthouse, asset optimization |
-| [frontend-design-ux-enforcement](frontend-design-ux-enforcement/SKILL.md) | 64 | Design systems, Tailwind v4, Shadcn/Radix, accessibility audits, mobile-first |
+| [frontend-design-pro](frontend-design-pro/SKILL.md) | 64 | Design systems, Tailwind v4, Shadcn/Radix, accessibility audits, mobile-first |
 | [browser-automation](browser-automation/SKILL.md) | 73 | Playwright, scraping, anti-bot handling, page monitoring, e2e testing |
 
 ### Productivity & Communication
@@ -107,15 +107,15 @@ Works with Claude Code, Cursor, Codex CLI, Windsurf, and any tool that reads `SK
 |-------|-------|-------------|
 | [content-strategy](content-strategy/SKILL.md) | 66 | Technical writing, READMEs, API docs, changelogs, SEO |
 | [productivity-automation](productivity-automation/SKILL.md) | 80 | Cron, batch jobs, file processing, backup automation, monitoring |
-| [google_workspace_assistant](google_workspace_assistant/SKILL.md) | 63 | Gmail, Calendar, Sheets, Drive automation |
+| [gws-assistant-pro](gws-assistant-pro/SKILL.md) | 63 | Gmail, Calendar, Sheets, Drive automation |
 
 ### Meta / Reasoning
 
 | Skill | Lines | What It Does |
 |-------|-------|-------------|
-| [project_orchestrator](project_orchestrator/SKILL.md) | 64 | Multi-step project coordination, task decomposition, agent delegation |
-| [sequential_thinking](sequential_thinking/SKILL.md) | 62 | Root cause analysis, architecture review, structured decision-making |
-| [repo_auditor](repo_auditor/SKILL.md) | 67 | Repository health, docs quality, broken links, release readiness |
+| [project-orchestrator-pro](project-orchestrator-pro/SKILL.md) | 64 | Multi-step project coordination, task decomposition, agent delegation |
+| [sequential-thinking-pro](sequential-thinking-pro/SKILL.md) | 62 | Root cause analysis, architecture review, structured decision-making |
+| [repo-auditor-pro](repo-auditor-pro/SKILL.md) | 67 | Repository health, docs quality, broken links, release readiness |
 | [ham-radio-network](ham-radio-network/SKILL.md) | 79 | Antenna math, CHIRP/DMR, FT8/APRS, AREDN mesh, VLAN/firewall design |
 
 ### Android Mobile

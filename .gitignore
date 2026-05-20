@@ -24,3 +24,17 @@ build/
 
 # Logs
 *.log
+
+# Private projects (not skills)
+goldenmatch/
+vllm/
+GER-LLM/
+llms-for-labeling-in-ER/
+
+# Temporary / machine-specific configs
+tmp/
+
+# Personal notes and operational docs (not skills)
+substack_shortlist_verified.md
+FALKORDB_GRAPHRAG_FINDINGS.md
+QDRANT_UPGRADE_RUNBOOK.md
