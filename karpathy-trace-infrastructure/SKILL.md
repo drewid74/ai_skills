@@ -96,3 +96,11 @@ Format as a clean markdown document.
 - If the user's description reveals that they don't have version control on their agent harness, flag this as the most urgent gap regardless of everything else. You cannot attribute improvements to changes if you don't track what changed.
 - Do not assume infrastructure details the user hasn't described. If you need to know whether they're using LangSmith, Braintrust, Arize, custom logging, or nothing at all — ask.
 </guardrails>
+
+## See Also
+
+- `karpathy-triplet-diag` — Determine whether the system itself is loop-ready before investing in trace infrastructure.
+- `karpathy-metric-pre` — Identify which gaming vectors the trace infrastructure must be able to detect.
+- `harness-engineering` — Version-control the agent harness so trace data can be attributed to specific harness states.
+- `ai-systems-architect` — Choose between LangSmith, Braintrust, Arize, or custom logging based on system architecture.
+- `sre-operations-lead` — Reuse existing observability stack patterns (Prometheus, Loki, Tempo) for agent trace storage.

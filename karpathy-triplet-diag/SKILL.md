@@ -83,3 +83,11 @@ Format either as a clean markdown document the user can copy out of the conversa
 - Do not pad the program.md with generic advice. Every line should be specific to the system the user described.
 - If the user's metric is clearly a proxy that could diverge from business value, flag that explicitly — but still complete the diagnostic. Prompt 2 in this kit handles metric gaming in depth.
 </guardrails>
+
+## See Also
+
+- `karpathy-metric-pre` — Red-team the optimization metric defined in the program.md before handing it to an agent loop.
+- `karpathy-trace-infrastructure` — Audit whether logging and trace infrastructure can support the meta-agent that will read the loop.
+- `harness-engineering` — Build the agent harness that the editable surface lives inside.
+- `ai-systems-architect` — Architect the broader pipeline the optimization target sits within.
+- `outcome-based-system-prompt` — Audit existing system prompts for compensating complexity before opening the editable surface.

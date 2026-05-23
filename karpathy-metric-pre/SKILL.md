@@ -80,3 +80,11 @@ Format as a clean markdown document.
 - Do not recommend abandoning the optimization effort. The goal is to make it robust, not to discourage it.
 - If a gaming vector requires domain-specific knowledge you lack, flag it as "potential vector requiring domain expert review" rather than guessing at specifics.
 </guardrails>
+
+## See Also
+
+- `karpathy-triplet-diag` — Define the system, editable surface, and metric this red-team is evaluating.
+- `karpathy-trace-infrastructure` — Ensure traces capture enough to detect the gaming vectors identified here.
+- `harness-engineering` — Place mechanical guardrails in the harness to block detected gaming patterns.
+- `ai-systems-architect` — Architect secondary metrics and evaluator diversity into the pipeline.
+- `outcome-based-system-prompt` — Remove prompt-level duct tape that creates proxy divergence risk.
