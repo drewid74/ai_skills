@@ -300,7 +300,7 @@ fun homeScreen_showsStartSession() {
 }
 ```
 
-## Common Pitfalls
+## Anti-Patterns
 
 | Symptom | Root cause | Fix |
 |---|---|---|

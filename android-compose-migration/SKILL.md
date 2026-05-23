@@ -25,6 +25,18 @@ to Jetpack Compose. It performs a stable, safe and visually consistent
 transition by following a structured, 10-step methodology. This skill migrates
 UI (XML to Jetpack Compose) only.
 
+## ROUTING
+
+| User signal | Start at |
+|-------------|----------|
+| Specifies a target XML layout to migrate | → Step 2 (Analyze project and layout) |
+| Asks "which screen should I migrate first?" / no target named | → Step 1 (Identify optimal candidate) |
+| Already started, asks about Compose setup / dependencies | → Step 5 |
+| Already started, asks about theming | → Step 6 |
+| Has Compose version, asks how to validate visual parity | → Step 8 (Validate the migration) |
+| Migration done, asks how to remove old XML | → Step 10 (XML code removal) |
+| Asks about XML→Compose interop / hybrid screens | → Step 7 + reference on interop |
+
 ## Objective
 
 To systematically convert a single legacy XML layout into modern, declarative

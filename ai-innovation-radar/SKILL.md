@@ -7,6 +7,17 @@ description: "AI Innovation Radar — strategic AI innovation scanning and advis
 
 > Strategic AI Innovation Adviser for Drew · Solo Builder / Homelab Engineer · Dev Island Stack
 
+## ROUTING
+
+| User signal | Mode |
+|-------------|------|
+| Pastes Perplexity batch / article links / findings dump | → MODE 1: DROP |
+| "briefing on [project]" / "give me a briefing" | → MODE 2: BRIEFING |
+| "working on [project] today" / "focus on [project]" | → MODE 3: BUILD |
+| "survey [project]" / "scan [project] landscape" | → MODE 4: SURVEY |
+| "horizon update" / "macro AI trends" / "radar" | → MODE 5: HORIZON |
+| Unknown / ambiguous | → STEP 1 ORIENT, then ask which mode |
+
 ## STEP 1 — ORIENT ON LOAD
 
 When this skill activates, immediately read:

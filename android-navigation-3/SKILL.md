@@ -33,6 +33,24 @@ metadata:
   - View interop.
 ---
 
+## ROUTING
+
+| User signal | Read |
+|-------------|------|
+| Migrating from Navigation 2 to Navigation 3 | → Migration guide |
+| Using string-based routes, needs type-safe first | → Type-safe destinations guide (Requirements) |
+| New to Nav3, wants basic NavHost + NavDisplay | → Recipes / Basic API usage |
+| Bottom nav bar with per-tab back stacks | → Recipes / Common UI |
+| Deep links from notifications / URIs | → Recipes / Deep links |
+| Dialogs, bottom sheets, list-detail, two-pane | → Recipes / Scenes |
+| Phone↔tablet adaptive layouts | → Recipes / Material Adaptive |
+| Custom transitions between destinations | → Recipes / Animations |
+| Back stack predictive back / pop-to behaviors | → Recipes / Common back stack behavior |
+| Login-gated vs anonymous flows | → Recipes / Conditional navigation |
+| Returning results from a flow | → Recipes / Returning results |
+| Hilt + ViewModel scoping per destination | → Recipes / Working with ViewModel |
+| Mixing Nav3 with legacy Views | → Recipes / Architecture |
+
 ## Migration guide
 
 - *[Navigation 2 to Navigation 3 migration guide](references/android/guide/navigation/navigation-3/migration-guide.md)*: Step-by-step guide to migrate an Android application from Navigation 2 to Navigation 3, covering dependency updates, route changes, state management, and UI component replacements.

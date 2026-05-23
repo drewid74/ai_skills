@@ -254,7 +254,7 @@ Provide a `DemoDeviceGenerator` that emits synthetic `ScannedDevice` objects and
 `DemoDataGenerator` that emits synthetic frames at the expected rate. Gate with
 `BuildConfig.USE_DEMO_MODE` so the flag never ships in release builds.
 
-## Common Pitfalls
+## Anti-Patterns
 
 | Symptom | Root cause | Fix |
 |---|---|---|

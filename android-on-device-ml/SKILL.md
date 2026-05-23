@@ -327,7 +327,7 @@ val assetPackManager = AssetPackManagerFactory.getInstance(context)
 // Check delivery status, then read from assetPackManager.getPackLocation("ml_models")
 ```
 
-## Common Pitfalls
+## Anti-Patterns
 
 | Symptom | Root cause | Fix |
 |---|---|---|

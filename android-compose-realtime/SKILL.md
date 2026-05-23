@@ -281,7 +281,7 @@ that is **not** a real-time display widget is a bug.
 | Canvas for gauges/graphs | Analog dials, waveforms, maps — anything requiring custom drawing |
 | `collectAsStateWithLifecycle` | All StateFlow → Compose wiring |
 
-## Common Pitfalls
+## Anti-Patterns
 
 | Symptom | Root cause | Fix |
 |---|---|---|

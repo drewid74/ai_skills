@@ -304,7 +304,7 @@ val recorder = Recorder.Builder()
 `FallbackStrategy.lowerQualityOrHigherThan` means: try UHD→FHD→HD→SD in order; if none
 are available, pick the nearest quality above SD.
 
-## Common Pitfalls
+## Anti-Patterns
 
 | Symptom | Root cause | Fix |
 |---|---|---|

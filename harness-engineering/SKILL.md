@@ -448,7 +448,7 @@ See `./references/dev-island-patterns.md` for: LiteLLM gateway setup, Forgejo tw
 
 ---
 
-## Common Pitfalls
+## Anti-Patterns
 
 | Pitfall | Symptom | Fix |
 |---|---|---|

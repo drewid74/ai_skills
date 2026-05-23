@@ -320,7 +320,7 @@ class PostSessionAnalyzer(private val repo: SessionRepository) {
 }
 ```
 
-## Common Pitfalls
+## Anti-Patterns
 
 | Symptom | Root cause | Fix |
 |---|---|---|

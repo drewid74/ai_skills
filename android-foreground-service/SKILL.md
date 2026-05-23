@@ -228,7 +228,7 @@ private fun stopCollection() {
 Never rely on `onDestroy()` for data persistence — the process can be killed between
 `stopSelf()` and `onDestroy()`.
 
-## Common Pitfalls
+## Anti-Patterns
 
 | Symptom | Root cause | Fix |
 |---|---|---|
