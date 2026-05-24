@@ -8,6 +8,7 @@ description: |
   by UUID or name pattern, handling BLE permissions on Android 12+, parsing binary telemetry
   packets, building a BleManager subclass, handling disconnect/reconnect loops, integrating
   GPS loggers, sensor hardware, OBD-II adapters, or any custom BLE peripheral.
+  Do not use for general Bluetooth Classic/SPP/RFCOMM pairing or connection management — use android-bluetooth instead.
 license: Apache-2.0
 metadata:
   author: Drew Fairweather

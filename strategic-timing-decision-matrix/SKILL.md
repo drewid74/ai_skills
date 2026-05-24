@@ -1,6 +1,6 @@
 ---
 name: strategic-timing-decision-matrix
-description: "Use this when: when should I raise my next round, timing my fundraise around the IPO window, should I IPO before SpaceX, M&A timing around AI mega-IPOs, capital market timing strategy, when is the best time to fundraise, hiring AI talent before the IPO window, strategic decisions around SpaceX OpenAI Anthropic IPO, sequence my business decisions, capital absorption window, IPO cycle planning, lock-up expiration strategy, when to raise vs wait, avoid the IPO capital crunch, strategic timing for CEOs, board strategy around mega-IPOs"
+description: "Use this when: when should I raise my next round, timing my fundraise around the IPO window, M&A timing around AI mega-IPOs, capital market timing strategy, when is the best time to fundraise, hiring AI talent before the IPO window, strategic decisions around upcoming AI IPOs, sequence my business decisions, capital absorption window, IPO cycle planning, lock-up expiration strategy, when to raise vs wait, avoid the IPO capital crunch, strategic timing for CEOs, board strategy around mega-IPOs"
 ---
 
 # Strategic Timing Decision Matrix
@@ -15,7 +15,7 @@ You are a strategic timing advisor who helps leaders sequence high-stakes decisi
 
 ## Step 1 — Orient the user
 
-Open by explaining that this session maps their strategic decisions against the 18-month window created by three simultaneous mega-IPOs — SpaceX, OpenAI, and Anthropic, collectively $170–195B in offerings against a market that absorbed $47B last year. The goal: identify which decisions to accelerate, which to delay, and what signals to watch.
+Open by explaining that this session maps their strategic decisions against the current IPO cycle — a period of concentrated mega-IPO activity that creates a capital absorption window. The goal: identify which decisions to accelerate, which to delay, and what signals to watch.
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: deep-research-pro
-description: "Use this skill for web research, technical fact-checking, competitive analysis, and sourcing. Triggers: 'research', 'search', 'find', 'check', 'latest news', 'documentation', 'specs', 'comparison', 'who is', 'what is the best', 'current trends', or requests for 'citations' and 'links'."
+description: "Use this when: I need current information from the web, fact-check this against live sources, find the latest news on, what changed recently in, verify this claim with citations, competitive analysis with sources, find documentation for a specific version, what is the current state of, I need links to primary sources. For deep offline research and threat intelligence triangulation, use research-analyst instead."
 ---
 
 # Deep Research & Fact-Grounding Playbook

@@ -20,9 +20,9 @@ description: "AI Innovation Radar — strategic AI innovation scanning and advis
 
 ## STEP 1 — ORIENT ON LOAD
 
-When this skill activates, immediately read:
-- `C:\users\afair\dev\dev_island\Projects\AI Innovation Radar\PRIORITY_QUEUE.md` — live ranked action list
-- All `STATUS_[Project].md` files under `C:\users\afair\dev\dev_island\Projects\`
+When this skill activates, ask the user for their project root path if not already known, then read:
+- `[project-root]/AI Innovation Radar/PRIORITY_QUEUE.md` — live ranked action list
+- All `STATUS_[Project].md` files under `[project-root]/`
 - Mode-specific files listed under each mode definition below
 
 Also query open-brain (search_thoughts) for recent notes tagged with project names before starting evaluation.

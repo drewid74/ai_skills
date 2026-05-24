@@ -1,8 +1,8 @@
-# AI Skills — 43 Lean Domain Skills for Claude Code, Cursor, Codex & Beyond
+# AI Skills — 65+ Lean Domain Skills for Claude Code, Cursor, Codex & Beyond
 
-> **43 focused skills.** Core skills follow the same template: Identity → Stack Defaults → Decision Framework → Anti-Patterns → Quality Gates (~75 lines). Android reference skills are full implementation guides with working code patterns. Dense enough to be useful, lean enough not to bloat your context window.
+> **65+ focused skills.** Skills come in three formats: (1) core skills using the standard template — Identity → Stack Defaults → Decision Framework → Anti-Patterns → Quality Gates (~75 lines); (2) Android/platform reference skills — full implementation guides with working code patterns; (3) third-party vendor skills with their own YAML schema (e.g. Google, Azure). Dense enough to be useful, lean enough not to bloat your context window.
 
-[![Skills](https://img.shields.io/badge/skills-43-blue)]()
+[![Skills](https://img.shields.io/badge/skills-65+-blue)]()
 [![Lines](https://img.shields.io/badge/lines-2%2C531+-green)]()
 [![Tokens](https://img.shields.io/badge/est._tokens-37K+-orange)]()
 [![License](https://img.shields.io/badge/license-MIT-yellow)]()
@@ -15,7 +15,7 @@ Skills load into your AI's context window on every invocation. Bloated skills wa
 
 | | Before (v1) | After (v2) |
 |--|-------------|------------|
-| Files | 47 (35 skills + 12 "super agents") | 35 skills |
+| Files | 47 (35 skills + 12 "super agents") | 65+ skills |
 | Total lines | 19,207 | 2,531 |
 | Est. tokens (full load) | ~240,000 | ~37,000 |
 | Avg lines/skill | ~400 | 72 |

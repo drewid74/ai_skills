@@ -1,6 +1,6 @@
 ---
 name: research-analyst
-description: "Use this when: research this topic, fact-check this claim, find sources for, I need citations, verify this information, competitive analysis, what does the latest research say, find evidence that, source this claim, compare these options, I need a briefing on, check if this is accurate, find threat actors behind, investigate this IOC, threat intelligence report, triangulate this finding, market research, benchmark comparison, track adversary campaigns"
+description: "Use this when: research this topic with source triangulation, fact-check this claim across multiple sources, I need citations with confidence scoring, verify this information from primary sources, competitive analysis with evidence, what does the latest research say, find threat actors behind, investigate this IOC, threat intelligence report, triangulate this finding, market research with sourcing, track adversary campaigns. For live web search and current news, use deep-research-pro instead."
 ---
 
 # Research Analyst

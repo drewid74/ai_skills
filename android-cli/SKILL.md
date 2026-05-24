@@ -1,6 +1,6 @@
 ---
 name: android-cli
-description: Orchestrates Android development tasks including project creation, deployment, SDK management, and environment diagnostics using the `android` command-line tool.
+description: "Use this when: android create project, android sdk install packages, android sdk list targets, android emulator create AVD, android emulator start, android run APK on device, android build tools, adb commands, Android project scaffolding from template, AVD management, deploy Android app from CLI, android environment info. Orchestrates Android development tasks including project creation, deployment, SDK management, and environment diagnostics using the android command-line tool."
 license: Complete terms in LICENSE.txt
 metadata:
   author: Google LLC
