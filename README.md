@@ -1,8 +1,8 @@
-# AI Skills — 65+ Lean Domain Skills for Claude Code, Cursor, Codex & Beyond
+# AI Skills — 66+ Lean Domain Skills for Claude Code, Cursor, Codex & Beyond
 
-> **65+ focused skills.** Skills come in three formats: (1) core skills using the standard template — Identity → Stack Defaults → Decision Framework → Anti-Patterns → Quality Gates (~75 lines); (2) Android/platform reference skills — full implementation guides with working code patterns; (3) third-party vendor skills with their own YAML schema (e.g. Google, Azure). Dense enough to be useful, lean enough not to bloat your context window.
+> **66+ focused skills.** Skills come in three formats: (1) core skills using the standard template — Identity → Stack Defaults → Decision Framework → Anti-Patterns → Quality Gates (~75 lines); (2) Android/platform reference skills — full implementation guides with working code patterns; (3) third-party vendor skills with their own YAML schema (e.g. Google, Azure). Dense enough to be useful, lean enough not to bloat your context window.
 
-[![Skills](https://img.shields.io/badge/skills-65+-blue)]()
+[![Skills](https://img.shields.io/badge/skills-66+-blue)]()
 [![Lines](https://img.shields.io/badge/lines-2%2C531+-green)]()
 [![Tokens](https://img.shields.io/badge/est._tokens-37K+-orange)]()
 [![License](https://img.shields.io/badge/license-MIT-yellow)]()
@@ -54,6 +54,7 @@ Works with Claude Code, Cursor, Codex CLI, Windsurf, and any tool that reads `SK
 | [infrastructure-as-code](infrastructure-as-code/SKILL.md) | 78 | Terraform/OpenTofu, Ansible, state management, drift detection, secrets handling |
 | [llm-inference-stack](llm-inference-stack/SKILL.md) | 79 | Ollama, vLLM, LiteLLM routing, VRAM sizing, quantization formats |
 | [service-integration](service-integration/SKILL.md) | 62 | Webhooks, n8n, message queues, notification pipelines, Traefik |
+| [orchestration-scaffold](orchestration-scaffold/SKILL.md) | 555 | OpenCode + LangGraph + Ollama + MCP scaffold: harness setup, agent wiring, SLIs, VS Code integration, TrueNAS/Docker Compose |
 
 ### Software Engineering
 
