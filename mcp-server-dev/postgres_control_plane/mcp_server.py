@@ -17,7 +17,14 @@ from .models import Task, is_valid_transition
 from .queue import TaskQueue
 
 BACKEND = os.environ.get("CONTROL_PLANE_BACKEND", "auto")
-queue = TaskQueue(backend=BACKEND)
+_backend_kwargs: dict = {}
+_db_path = os.environ.get("CONTROL_PLANE_DB_PATH")
+if _db_path:
+    _backend_kwargs["db_path"] = _db_path
+_dsn = os.environ.get("DATABASE_URL")
+if _dsn and BACKEND in ("postgres", "auto"):
+    _backend_kwargs.setdefault("dsn", _dsn)
+queue = TaskQueue(backend=BACKEND, **_backend_kwargs)
 
 mcp = FastMCP("control-plane")
 
