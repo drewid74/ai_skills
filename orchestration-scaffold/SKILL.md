@@ -1,8 +1,17 @@
+---
+name: orchestration-scaffold
+description: >
+  Use this when: scaffold a local AI orchestration stack, set up LangGraph supervisor,
+  connect Ollama to OpenCode, configure MCP servers for agent tools, wire OpenCode as the
+  developer interface for a multi-agent system, set up A2A protocol between LangGraph and
+  OpenCode, configure VS Code for agent development, orchestration stack on TrueNAS /
+  Docker Compose homelab, choose between AG2 and CrewAI sub-frameworks, set up agent
+  harness with PreToolUse hooks, define SLIs for an AI orchestration stack, design
+  generator-evaluator pattern for agent output, local inference routing with Qwen3 or
+  Mistral Small.
+---
+
 # Orchestration Scaffold
-
-## Description
-
-Use this when: scaffold a local AI orchestration stack, set up LangGraph supervisor, connect Ollama to OpenCode, configure MCP servers for agent tools, wire OpenCode as the developer interface for a multi-agent system, set up A2A protocol between LangGraph and OpenCode, configure VS Code for agent development, orchestration stack on TrueNAS / Docker Compose homelab, choose between AG2 and CrewAI sub-frameworks, set up agent harness with PreToolUse hooks, define SLIs for an AI orchestration stack, design generator-evaluator pattern for agent output, local inference routing with Qwen3 or Mistral Small.
 
 ---
 

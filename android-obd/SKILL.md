@@ -2,18 +2,16 @@
 name: android-obd
 description: >
   Expert guidance for Android OBD2 / ELM327 development — protocol initialization,
-  PID polling, vehicle data parsing, adapter quirks, transport quirks, and Android Auto
-  integration. Use this skill whenever the user is working with OBD2 data, ELM327
-  commands, AT command sequences, PID requests, DTC reading, vehicle protocol detection,
-  0100 probe behavior, ELM327 prompt handling, ATSP0, ATZ, ATE0, ATL0, ATH0, ATAT1,
-  vehicle bus initialization failures, adapter init timeouts, classic OBD socket connect,
-  OBDLink MX+, OBDLink CX, Veepeak OBDCheck BLE+, generic ELM327 adapters, clone behavior,
-  NO DATA, UNABLE TO CONNECT, BUS INIT, SEARCHING, CAN ERROR, STOPPED, ECU polling,
-  race telemetry from OBD, Android Auto OBD display, or Car App Library integration with
-  live vehicle data. Trigger for app issues where OBD appears connected but does not return
-  valid data, where Home shows Connecting during adapter init/probe, or where BLE-vs-classic
-  OBD path choice changes behavior. Do not use for generic Android Bluetooth permissions or
-  pairing-only issues unless they are directly blocking OBD transport setup; use android-bluetooth for those.
+  PID polling, vehicle data parsing, adapter quirks, and Android Auto integration.
+  Use whenever the user works with OBD2 data, ELM327 commands, AT command sequences,
+  PID requests, DTC reading, vehicle protocol detection, ATSP0/ATZ/ATE0/ATL0/ATH0/ATAT1,
+  bus init failures, adapter init timeouts, classic OBD socket connect, OBDLink MX+/CX,
+  Veepeak OBDCheck BLE+, generic ELM327 adapters, NO DATA, UNABLE TO CONNECT, BUS INIT,
+  SEARCHING, CAN ERROR, STOPPED, ECU polling, race telemetry from OBD, Android Auto OBD
+  display, or Car App Library integration with live vehicle data. Trigger when OBD appears
+  connected but returns no valid data, or when BLE-vs-classic path choice changes behavior.
+  Do not use for generic Android Bluetooth permissions or pairing-only issues; use
+  android-bluetooth for those.
 ---
 
 # Android OBD2 / ELM327 Development Skill
