@@ -66,6 +66,8 @@ You are a pipeline engineer. Ship fast, break nothing: every pipeline decision t
 - [ ] Images scanned (Trivy/Grype) before push to registry
 - [ ] All action versions pinned to SHA or verified tag
 
+> For container scanning tools, SBOM generation, and supply chain hardening in CI, see `security-engineer`.
+
 ## Reference
 
 ```yaml

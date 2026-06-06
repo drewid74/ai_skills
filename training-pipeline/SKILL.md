@@ -68,8 +68,124 @@ You are an LLM training engineer. Default to LoRA unless given a reason not to. 
 
 ## Reference
 ```
-LoRA VRAM: model_fp16 × 1.1 + activations + optimizer ≈ 16.9GB for 7B (r=16)
+LoRA VRAM:   model_fp16 × 1.1 + activations ≈ 16.9GB for 7B (r=16)
 Full FT VRAM: model + gradients + activations ≈ 29.5GB for 7B
-QLoRA: 7B→~8GB, 13B→~14GB, 34B→~22GB (4-bit base)
-LR ranges: LoRA 1e-4–3e-4 | Full FT 5e-5–1e-4 | Continued pretraining 1e-5–5e-5
+QLoRA:       7B→~8GB, 13B→~14GB, 34B→~22GB (4-bit base)
+LR ranges:   LoRA 1e-4–3e-4 | Full FT 5e-5–1e-4 | Pretrain 1e-5–5e-5
 ```
+
+---
+
+## Training Methods Compared
+
+| Method | VRAM | When to use |
+|--------|------|-------------|
+| Full fine-tune | 4–6× model | Max quality, ample VRAM |
+| LoRA (r=16) | ~1.1× model | 24–80GB GPU, production adapters |
+| QLoRA | ~0.5× model | 8–24GB consumer GPU, experimentation |
+| Continued pretraining | 4–6× model | New domain vocabulary; run before instruction tuning |
+
+## Dataset Preparation
+
+**Formats:**
+- Instruction tuning: `{"instruction": "...", "input": "...", "output": "..."}`
+- Chat: `{"messages": [{"role": "user", "content": "..."}, {"role": "assistant", "content": "..."}]}`
+- Pretraining: Raw text or JSONL with `"text"` field
+- Preference (DPO): `{"chosen": "...", "rejected": "..."}`
+
+**Quality > quantity:** 1,000 clean examples beats 100,000 noisy ones.
+- Deduplicate: MinHash for near-duplicates, exact-hash for identical
+- Filter: too-short, too-long, toxic, malformed
+- Spot-check 50+ random samples before training
+
+## Quick Start: LoRA with HuggingFace
+
+```python
+from peft import LoraConfig, get_peft_model
+from transformers import AutoModelForCausalLM, Trainer, TrainingArguments
+
+model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b")
+lora_config = LoraConfig(r=16, lora_alpha=32, target_modules=["q_proj", "v_proj"])
+model = get_peft_model(model, lora_config)
+
+training_args = TrainingArguments(
+    output_dir="./results",
+    learning_rate=2e-4,
+    per_device_train_batch_size=4,
+    gradient_accumulation_steps=8,   # effective batch = 32
+    num_train_epochs=3,
+    bf16=True,
+    eval_strategy="steps",
+    eval_steps=100,
+    save_strategy="best",
+    load_best_model_at_end=True,
+)
+
+trainer = Trainer(model=model, args=training_args, train_dataset=train_data, eval_dataset=val_data)
+trainer.train()
+```
+
+```bash
+# Multi-GPU DDP
+torchrun --nproc_per_node=4 train.py
+```
+
+## Hyperparameter Reference
+
+```
+learning_rate:
+  LoRA:              1e-4 to 3e-4   (watch: val loss should drop within 50 steps)
+  Full fine-tune:    5e-5 to 1e-4   (watch: loss curves, not just final value)
+  Continued pretrain: 1e-5 to 5e-5  (watch: perplexity on held-out domain text)
+
+epochs:       1–3 (more = overfit risk; watch val loss every 50–100 steps)
+warmup:       3–10% of total steps (linear or cosine)
+weight_decay: 0.01–0.1
+scheduler:    cosine decay (safe default)
+```
+
+## Distributed Training Reference
+
+| Scenario | Tool | Command |
+|----------|------|---------|
+| 1 GPU | Trainer | `python train.py` |
+| 2–8 GPU, fits 1 GPU | DDP | `torchrun --nproc_per_node=N train.py` |
+| Model won't fit 1 GPU | FSDP | `--fsdp "full_shard auto_wrap"` |
+| Memory pressure | DeepSpeed ZeRO-2 | `--deepspeed ds_z2_config.json` |
+| Very large model | ZeRO-3 + offload | `--deepspeed ds_z3_offload.json` |
+
+## Experiment Tracking
+
+**MLflow (self-hosted):**
+```bash
+docker run -p 5000:5000 mlflow/mlflow mlflow server
+```
+```python
+import mlflow
+mlflow.log_params({"lr": 2e-4, "epochs": 3})
+mlflow.log_metrics({"val_loss": val_loss}, step=step)
+```
+
+**Minimal (no server):** Save JSON per run: timestamp, config, final metrics, git hash.
+
+## Autonomous Training Loop
+
+For fixed-budget hyperparameter search (~12 experiments/hour on 1 GPU):
+1. Agent proposes config change (LR, rank, data sampling)
+2. Train, measure validation bpb/perplexity
+3. Keep best checkpoint, log lineage
+4. Repeat; agent cannot modify data loading, eval, or timing logic
+
+## Troubleshooting
+
+| Problem | Causes | Fix |
+|---------|--------|-----|
+| Loss not decreasing | LR too low/high, data bug | 10× LR sweep on 1% data; visualize samples |
+| Loss is NaN | LR too high, fp16 instability | Halve LR; switch to bf16; check data for inf/NaN |
+| OOM training | Batch size, seq_len, full FT | Reduce batch, add gradient accumulation, use QLoRA |
+| OOM eval | Eval batch too large | Reduce eval batch; wrap with `torch.no_grad()` |
+| Slow training | Low GPU utilization | `nvidia-smi`; add `torch.compile()`; increase batch |
+| Overfitting | Val loss rises | Fewer epochs, dropout, more data, LoRA smaller r |
+| Catastrophic forgetting | Base knowledge degraded | Lower LR; use LoRA; mix general-domain data |
+
+> For model deployment after training, see `llm-inference-stack`.

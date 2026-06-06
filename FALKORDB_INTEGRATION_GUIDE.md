@@ -90,7 +90,7 @@ from falkordb import FalkorDB
 from falkordb.graphrag import GraphRAG
 
 # Connect to FalkorDB instance
-db = FalkorDB(host="172.16.8.13", port=6379)
+db = FalkorDB(host="<FALKORDB_HOST>", port=6379)
 
 # Initialize GraphRAG with LiteLLMEmbedder
 graphrag = GraphRAG(
@@ -338,7 +338,7 @@ embedder = create_litellm_embedder(
 ```python
 from falkordb import FalkorDB
 
-db = FalkorDB(host="172.16.8.13", port=6379)
+db = FalkorDB(host="<FALKORDB_HOST>", port=6379)
 info = db.info()
 print(f"FalkorDB version: {info['version']}")
 print(f"Connected: {info['connected']}")
@@ -378,7 +378,7 @@ print(f"Connected: {info['connected']}")
 **Cause:** FalkorDB instance not running or wrong host/port.
 
 **Solution:**
-1. Verify FalkorDB is running: `redis-cli -h 172.16.8.13 ping`
+1. Verify FalkorDB is running: `redis-cli -h <FALKORDB_HOST> ping`
 2. Check firewall rules
 3. Verify credentials if authentication is enabled
 
@@ -392,8 +392,8 @@ print(f"Connected: {info['connected']}")
 
 ## References
 
-- **ParallelLLM:** `C:\Users\afair\dev\ai_skills\GER-LLM\ParallelLLM\`
-- **LiteLLMEmbedder:** `C:\Users\afair\dev\ai_skills\goldenmatch\packages\python\goldenmatch\goldenmatch\core\litellm_embedder.py`
-- **Example:** `C:\Users\afair\dev\ai_skills\goldenmatch\packages\python\goldenmatch\examples\litellm_embedder_example.py`
+- **ParallelLLM:** `GER-LLM/ParallelLLM/`
+- **LiteLLMEmbedder:** `goldenmatch/packages/python/goldenmatch/goldenmatch/core/litellm_embedder.py`
+- **Example:** `goldenmatch/packages/python/goldenmatch/examples/litellm_embedder_example.py`
 - **FalkorDB Docs:** https://docs.falkordb.com/
 - **GraphRAG-SDK:** https://github.com/FalkorDB/GraphRAG-SDK

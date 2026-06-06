@@ -37,6 +37,9 @@ tmp/
 # Personal notes and operational docs (not skills)
 substack_shortlist_verified.md
 FALKORDB_GRAPHRAG_FINDINGS.md
+FALKORDB_INTEGRATION_GUIDE.md
+LITELLM_EMBEDDER_SUMMARY.md
+OPTIMIZATION_REPORT.md
 QDRANT_UPGRADE_RUNBOOK.md
 
 nul

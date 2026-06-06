@@ -3,7 +3,7 @@
 ## What Was Done
 
 ### 1. Created LiteLLMEmbedder Class
-**File:** `C:\Users\afair\dev\ai_skills\goldenmatch\packages\python\goldenmatch\goldenmatch\core\litellm_embedder.py`
+**File:** `goldenmatch/packages/python/goldenmatch/goldenmatch/core/litellm_embedder.py`
 
 **Features:**
 - Wraps existing ParallelLLM Client for multi-provider routing
@@ -34,7 +34,7 @@ LiteLLMEmbedder(
 ```
 
 ### 2. Created Example/Test File
-**File:** `C:\Users\afair\dev\ai_skills\goldenmatch\packages\python\goldenmatch\examples\litellm_embedder_example.py`
+**File:** `goldenmatch/packages/python/goldenmatch/examples/litellm_embedder_example.py`
 
 **Demonstrates:**
 - Basic single-text embedding
@@ -153,7 +153,7 @@ embedder = create_litellm_embedder(
 )
 
 # 2. Connect to FalkorDB
-db = FalkorDB(host="172.16.8.13", port=6379)
+db = FalkorDB(host="<FALKORDB_HOST>", port=6379)
 
 # 3. Initialize GraphRAG
 graphrag = GraphRAG(
@@ -247,9 +247,6 @@ export PROJECT_ID="my-gcp-project"
 2. `goldenmatch/packages/python/goldenmatch/examples/litellm_embedder_example.py` (150 lines)
 3. `FALKORDB_INTEGRATION_GUIDE.md` (400+ lines)
 
-### Modified
-- None (ParallelLLM already supports `dimensions` via `**kwargs`)
-
 ## Testing Checklist
 
 - [ ] Verify ParallelLLM config loads correctly
@@ -283,3 +280,4 @@ export PROJECT_ID="my-gcp-project"
 - **ParallelLLM LoadBalancer:** `GER-LLM/ParallelLLM/src/pllm/balancer.py`
 - **Integration Guide:** `FALKORDB_INTEGRATION_GUIDE.md`
 - **Example Code:** `goldenmatch/packages/python/goldenmatch/examples/litellm_embedder_example.py`
+
