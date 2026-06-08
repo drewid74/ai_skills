@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Homelab — Full Architecture Map (2026-06-08)</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  /* ── theme tokens ──────────────────────────────────────────── */
+  :root {
+    --bg:            #0d1117;
+    --surface:       rgba(13,17,23,0.93);
+    --surface-tip:   rgba(13,17,23,0.97);
+    --border:        #30363d;
+    --text-h:        #f0f6fc;
+    --text-body:     #c9d1d9;
+    --text-muted:    #8b949e;
+    --ctrl-bg:       rgba(22,27,34,0.9);
+    --ctrl-hover:    #21262d;
+    --cb-bg:         #161b22;
+    --link-hard:     #58a6ff;
+    --link-soft:     #6e7681;
+    --node-text:     #c9d1d9;
+    --node-shadow:   0 1px 3px #0d1117;
+    --preset-hover-text: #f0f6fc;
+  }
+  html[data-theme="light"] {
+    --bg:            #f6f8fa;
+    --surface:       rgba(255,255,255,0.96);
+    --surface-tip:   rgba(255,255,255,0.98);
+    --border:        #d0d7de;
+    --text-h:        #1f2328;
+    --text-body:     #444c56;
+    --text-muted:    #6e7781;
+    --ctrl-bg:       rgba(255,255,255,0.92);
+    --ctrl-hover:    #eaeef2;
+    --cb-bg:         #f6f8fa;
+    --link-hard:     #0969da;
+    --link-soft:     #9198a1;
+    --node-text:     #333;
+    --node-shadow:   0 1px 2px #fff;
+    --preset-hover-text: #0969da;
+  }
+  /* ── base ───────────────────────────────────────────────────── */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text-body); font-family: 'Segoe UI', system-ui, sans-serif; overflow: hidden; transition: background .25s, color .25s; }
+  svg { width: 100vw; height: 100vh; background: var(--bg); transition: background .25s; }
+  /* ── panels ─────────────────────────────────────────────────── */
+  #header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 16px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  #header h1 { font-size: 14px; font-weight: 600; color: var(--text-h); }
+  #header .meta { font-size: 11px; color: var(--text-muted); }
+  #alerts-banner { position: fixed; top: 44px; left: 0; right: 0; z-index: 99; background: rgba(210,81,36,0.12); border-bottom: 1px solid rgba(210,81,36,0.35); padding: 4px 16px; display: none; gap: 12px; align-items: center; font-size: 11px; color: #f85149; flex-wrap: wrap; }
+  .alert-tag { background: rgba(210,81,36,0.15); border: 1px solid rgba(248,81,73,0.3); border-radius: 4px; padding: 1px 6px; white-space: nowrap; }
+  #legend, #stack-legend, #edge-legend { position: fixed; bottom: 12px; z-index: 100; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 11px; }
+  #legend { left: 12px; min-width: 170px; }
+  #stack-legend { left: 200px; }
+  #edge-legend { left: 360px; }
+  #legend h3, #stack-legend h3 { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .legend-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .legend-label { color: var(--text-body); }
+  .stack-ring { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; border: 2.5px solid transparent; }
+  .edge-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .edge-line { width: 20px; height: 2px; flex-shrink: 0; }
+  #tooltip { position: fixed; z-index: 200; pointer-events: none; background: var(--surface-tip); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; max-width: 340px; font-size: 12px; display: none; }
+  #tooltip .tt-name { font-size: 13px; font-weight: 600; color: var(--text-h); margin-bottom: 6px; }
+  #tooltip .tt-row { color: var(--text-muted); margin-bottom: 3px; }
+  #tooltip .tt-row span { color: var(--text-body); }
+  #tooltip .tt-stack { display: inline-block; font-size: 10px; border-radius: 3px; padding: 1px 5px; margin-bottom: 6px; font-weight: 600; }
+  #tooltip .tt-notes { color: #f85149; margin-top: 6px; font-size: 11px; border-top: 1px solid var(--border); padding-top: 6px; }
+  /* ── controls ───────────────────────────────────────────────── */
+  #controls { position: fixed; top: 90px; right: 12px; z-index: 100; display: flex; flex-direction: column; gap: 4px; }
+  .ctrl-btn { background: var(--ctrl-bg); border: 1px solid var(--border); color: var(--text-body); border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 12px; transition: background .15s, color .15s; }
+  .ctrl-btn:hover { background: var(--ctrl-hover); }
+  /* ── filter panel ───────────────────────────────────────────── */
+  #filter-bar { position: fixed; top: 90px; left: 12px; z-index: 100; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; min-width: 160px; }
+  #filter-bar .section-label { font-size: 10px; color: var(--text-muted); padding: 6px 0 3px 0; text-transform: uppercase; letter-spacing: .05em; }
+  #filter-bar .section-label:first-child { padding-top: 0; }
+  .cb-row { display: flex; align-items: center; gap: 7px; padding: 2px 0; cursor: pointer; }
+  .cb-row input[type=checkbox] { appearance: none; width: 13px; height: 13px; border: 1.5px solid var(--border); border-radius: 3px; background: var(--cb-bg); cursor: pointer; flex-shrink: 0; position: relative; transition: all .15s; }
+  .cb-row input[type=checkbox]:checked { background: var(--cb-color,#58a6ff); border-color: var(--cb-color,#58a6ff); }
+  .cb-row input[type=checkbox]:checked::after { content:''; position:absolute; left:3px; top:1px; width:4px; height:7px; border:1.5px solid #fff; border-top:none; border-left:none; transform:rotate(45deg); }
+  .cb-label { font-size: 11px; cursor: pointer; }
+  .preset-row { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 2px; }
+  .preset-btn { background: var(--ctrl-bg); border: 1px solid var(--border); border-radius: 4px; padding: 3px 7px; cursor: pointer; font-size: 10px; color: var(--text-muted); transition: all .15s; white-space: nowrap; }
+  .preset-btn:hover { color: var(--preset-hover-text); border-color: var(--link-hard); background: rgba(88,166,255,0.08); }
+  /* ── graph ───────────────────────────────────────────────────── */
+  .node circle { stroke-width: 1.5; cursor: pointer; transition: opacity 0.15s; }
+  .node text { font-size: 9px; fill: var(--node-text); pointer-events: none; text-shadow: var(--node-shadow); }
+  .node.spof circle { stroke: #f85149 !important; stroke-width: 2.5; }
+  .node.alert circle { stroke: #f0883e !important; stroke-width: 2.5; animation: pulse 2s infinite; }
+  .node.down circle { opacity: 0.4; }
+  @keyframes pulse { 0%,100%{stroke-opacity:1}50%{stroke-opacity:0.3} }
+  .link { fill: none; stroke-opacity: 0.35; }
+  .link.hard { stroke-dasharray: none; }
+  .link.soft { stroke-dasharray: 5,3; }
+</style>
+</head>
+<body>
+<div id="header">
+  <h1>🏠 Homelab — Full Architecture Map (dev_island + Panopticon)</h1>
+  <div class="meta">106 entities · 7 stacks · 7 hosts · 2026-06-08</div>
+  <div class="meta" style="margin-left:auto">Scroll to zoom · Drag to pan · Click node for details</div>
+  <span id="live-status" style="display:none;font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(63,185,80,0.15);border:1px solid rgba(63,185,80,0.4);color:#3fb950;margin-left:4px">● LIVE</span>
+</div>
+<div id="alerts-banner"></div>
+<div id="legend">
+  <h3>Layer</h3>
+  <div class="legend-row"><div class="legend-dot" style="background:#6e7681"></div><div class="legend-label">Infrastructure</div></div>
+  <div class="legend-row"><div class="legend-dot" style="background:#388bfd"></div><div class="legend-label">Resource / Data</div></div>
+  <div class="legend-row"><div class="legend-dot" style="background:#bc8cff"></div><div class="legend-label">AI Resource</div></div>
+  <div class="legend-row"><div class="legend-dot" style="background:#3fb950"></div><div class="legend-label">Network</div></div>
+  <div class="legend-row"><div class="legend-dot" style="background:#ff7b72"></div><div class="legend-label">AI Compute</div></div>
+  <div class="legend-row"><div class="legend-dot" style="background:#e3b341"></div><div class="legend-label">Application / Agent</div></div>
+  <div class="legend-row"><div class="legend-dot" style="background:#8b949e"></div><div class="legend-label">External</div></div>
+  <br>
+  <div class="legend-row"><div class="legend-dot" style="background:transparent;border:2px solid #f85149;width:12px;height:12px;border-radius:50%"></div><div class="legend-label" style="color:#f85149">SPOF</div></div>
+  <div class="legend-row"><div class="legend-dot" style="background:transparent;border:2px solid #f0883e;width:12px;height:12px;border-radius:50%"></div><div class="legend-label" style="color:#f0883e">Alert / Down</div></div>
+</div>
+<div id="stack-legend">
+  <h3>Stack</h3>
+  <div class="legend-row"><div class="stack-ring" style="border-color:#58a6ff;background:rgba(88,166,255,0.15)"></div><div class="legend-label">dev_island</div></div>
+  <div class="legend-row"><div class="stack-ring" style="border-color:#2ea043;background:rgba(46,160,67,0.15)"></div><div class="legend-label">panopticon</div></div>
+  <div class="legend-row"><div class="stack-ring" style="border-color:#e3b341;background:rgba(227,179,65,0.15)"></div><div class="legend-label">shared</div></div>
+  <div class="legend-row"><div class="stack-ring" style="border-color:#8b949e;background:transparent"></div><div class="legend-label">external</div></div>
+  <div class="legend-row"><div class="stack-ring" style="border-color:#d2a8ff;background:rgba(210,168,255,0.1)"></div><div class="legend-label">delta7</div></div>
+  <div class="legend-row"><div class="stack-ring" style="border-color:#f0a050;background:rgba(240,160,80,0.1)"></div><div class="legend-label">media / arr</div></div>
+</div>
+<div id="edge-legend">
+  <h3 style="font-size:11px;color:#8b949e;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Dependency</h3>
+  <div class="edge-row"><div class="edge-line" style="background:#58a6ff"></div><div style="color:#c9d1d9">Hard</div></div>
+  <div class="edge-row"><div class="edge-line" style="background:repeating-linear-gradient(90deg,#58a6ff 0,#58a6ff 5px,transparent 5px,transparent 8px)"></div><div style="color:#c9d1d9">Soft</div></div>
+</div>
+<div id="controls">
+  <button class="ctrl-btn" onclick="window.location.href='homelab_map_3d_2026-06-08.html'">🧊 3D</button>
+  <button class="ctrl-btn" onclick="resetZoom()">⊕ Reset</button>
+  <button class="ctrl-btn" onclick="toggleLabels()">≡ Labels</button>
+  <button class="ctrl-btn" id="theme-btn" onclick="toggleTheme()">☀ Light</button>
+  <button class="ctrl-btn" id="live-btn" onclick="toggleLive()" title="Pull alert + up/down state from Prometheus">⬤ Live</button>
+</div>
+<div id="filter-bar">
+  <div class="section-label">Stack</div>
+  <label class="cb-row"><input type="checkbox" id="cb-dev_island" checked style="--cb-color:#58a6ff" onchange="onCbChange()"><span class="cb-label" style="color:#58a6ff">dev_island</span></label>
+  <label class="cb-row"><input type="checkbox" id="cb-panopticon" checked style="--cb-color:#2ea043" onchange="onCbChange()"><span class="cb-label" style="color:#2ea043">panopticon</span></label>
+  <label class="cb-row"><input type="checkbox" id="cb-shared" checked style="--cb-color:#e3b341" onchange="onCbChange()"><span class="cb-label" style="color:#e3b341">shared infra</span></label>
+  <label class="cb-row"><input type="checkbox" id="cb-compute" checked style="--cb-color:#ff7b72" onchange="onCbChange()"><span class="cb-label" style="color:#ff7b72">compute</span></label>
+  <label class="cb-row"><input type="checkbox" id="cb-external" checked style="--cb-color:#8b949e" onchange="onCbChange()"><span class="cb-label" style="color:#8b949e">external</span></label>
+  <label class="cb-row"><input type="checkbox" id="cb-delta7"   checked style="--cb-color:#d2a8ff" onchange="onCbChange()"><span class="cb-label" style="color:#d2a8ff">delta7</span></label>
+  <label class="cb-row"><input type="checkbox" id="cb-media"    checked style="--cb-color:#f0a050" onchange="onCbChange()"><span class="cb-label" style="color:#f0a050">media / arr</span></label>
+  <div class="section-label">Presets</div>
+  <div class="preset-row">
+    <button class="preset-btn" onclick="preset('all')">All</button>
+    <button class="preset-btn" onclick="preset('di')">dev_island</button>
+    <button class="preset-btn" onclick="preset('pano')">panopticon</button>
+  </div>
+  <div class="preset-row">
+    <button class="preset-btn" onclick="preset('ai')">AI pipeline</button>
+    <button class="preset-btn" onclick="preset('delta7only')">delta7</button>
+    <button class="preset-btn" onclick="preset('spof')">SPOFs</button>
+  </div>
+</div>
+<div id="tooltip"></div>
+<svg id="graph"></svg>
+<script>
+// stack values: "shared" | "dev_island" | "panopticon" | "compute" | "external"
+const stackColor = { "shared":"#e3b341", "dev_island":"#58a6ff", "panopticon":"#2ea043", "compute":"#ff7b72", "external":"#8b949e", "delta7":"#d2a8ff", "media":"#f0a050" };
+
+const nodes = [
+  // ── SHARED INFRASTRUCTURE ────────────────────────────────────────────────
+  { id:"host-nas-dxp4800",    label:"NAS DXP4800",       layer:"Infrastructure",     stack:"shared",    tier:0, ha:"single-node",    spof:true,  alert:false, down:false, addr:"192.168.7.205",        note:"SPOF: hosts ALL dev_island + panopticon services. Single TrueNAS SCALE node." },
+  { id:"host-eqi12",          label:"eqi12",             layer:"Infrastructure",     stack:"shared",    tier:1, ha:"single-node",    spof:false, alert:true,  down:false, addr:"192.168.7.97",         note:"Ubuntu 24.04. Hosts panopticon eqi12-profile + LiteLLM. HostDiskFillingFast alert (stabilized)." },
+  { id:"host-xai",            label:"xai RTX 5080",      layer:"Infrastructure",     stack:"compute",   tier:1, ha:"single-node",    spof:true,  alert:false, down:false, addr:"192.168.7.190",        note:"SPOF: primary embedding host (nomic-embed-text 768d)." },
+  { id:"host-sparky1",        label:"DGX Spark #1 ↓",    layer:"Infrastructure",     stack:"compute",   tier:1, ha:"single-node",    spof:true,  alert:true,  down:true,  addr:"172.16.200.165",       note:"CURRENTLY DOWN. VLLMNodeDown + InferenceNodeSwapThrashing." },
+  { id:"host-sparka",         label:"DGX Spark #2",      layer:"Infrastructure",     stack:"compute",   tier:1, ha:"single-node",    spof:false, alert:false, down:false, addr:"172.16.200.166",       note:"DGX Spark GB10 #2. vLLM confirmed running at :8000 (Prometheus target up)." },
+  { id:"host-nuc1",           label:"nuc1 RTX 5070",     layer:"Infrastructure",     stack:"compute",   tier:2, ha:"single-node",    spof:false, alert:true,  down:false, addr:"192.168.7.210",        note:"NUC 11. GPUMemoryNearFull alert. Runs BOTH Ollama :11434 and vLLM :8000." },
+  { id:"storage-nas1pool",    label:"NAS1Pool ZFS",      layer:"Infrastructure",     stack:"shared",    tier:0, ha:"single-node",    spof:true,  alert:false, down:false, addr:"192.168.7.205 ZFS",    note:"SPOF: all dev_island persistent data. 19TB / 3% used." },
+  { id:"storage-pano-pool",   label:"Panopticon ZFS",    layer:"Infrastructure",     stack:"panopticon",tier:0, ha:"single-node",    spof:true,  alert:false, down:false, addr:"192.168.7.205 ZFS sub", note:"SPOF: all panopticon persistent data. /mnt/NAS1Pool/Apps/panopticon/*" },
+  // Networks
+  { id:"net-dev-island",      label:"dev_island_net",    layer:"Network",            stack:"dev_island",tier:0, ha:"single-node",    spof:true,  alert:false, down:false, addr:"172.16.6.0/24",        note:"SPOF: all dev_island inter-service DNS." },
+  { id:"net-panopticon",      label:"panopticon_net",    layer:"Network",            stack:"shared",    tier:0, ha:"single-node",    spof:true,  alert:false, down:false, addr:"172.16.9.0/24",        note:"SPOF: all panopticon inter-service DNS. External to dev_island compose." },
+  { id:"net-nvsync-vpn",      label:"nvsync VPN",        layer:"Network",            stack:"compute",   tier:1, ha:"N/A",            spof:false, alert:false, down:false, addr:"172.16.200.0/24",      note:"NVIDIA Sync VPN to DGX Spark nodes." },
+  { id:"net-panopticon-vip",  label:"VIP .240",          layer:"Network",            stack:"panopticon",tier:1, ha:"warm-standby",   spof:false, alert:false, down:false, addr:"192.168.7.240",        note:"keepalived VIP. eqi12 containers reach NAS via this. Redis :6379, AMQP :5672, FalkorDB :6380." },
+  { id:"net-proxy-nginx",     label:"nginx proxy (DI)",  layer:"Network",            stack:"dev_island",tier:2, ha:"single-node",    spof:false, alert:false, down:false, addr:":29207/:29230/:29231", note:"dev_island nginx: PyPI mirror + reverse proxy + MCP TLS." },
+  { id:"net-pano-frontend-nginx", label:"Frontend nginx (P)", layer:"Network",       stack:"panopticon",tier:1, ha:"single-node",    spof:true,  alert:false, down:false, addr:":29000/:29443",        note:"Panopticon nginx SPA + TLS termination (drewid.net:9443)." },
+  // ── SHARED COMPUTE ───────────────────────────────────────────────────────
+  { id:"infer-ollama-xai",    label:"Ollama xai",        layer:"AI_Compute_Runtime", stack:"compute",   tier:1, ha:"single-node",    spof:true,  alert:false, down:false, addr:"192.168.7.190:11434",  note:"SPOF: primary embedding for dev_island_letta + dev_island_skills_sync (nomic-embed-text)." },
+  { id:"infer-ollama-nuc1",   label:"Ollama nuc1",       layer:"AI_Compute_Runtime", stack:"compute",   tier:2, ha:"single-node",    spof:false, alert:true,  down:false, addr:"192.168.7.210:11434",  note:"Secondary inference. GPUMemoryNearFull." },
+  { id:"infer-vllm-sparky1",  label:"vLLM sparky1 ↓",   layer:"AI_Compute_Runtime", stack:"compute",   tier:1, ha:"single-node",    spof:true,  alert:true,  down:true,  addr:"172.16.200.165:8000",  note:"SPOF: PRIMARY LLM for both stacks. CURRENTLY DOWN." },
+  { id:"gateway-litellm-eqi12", label:"LiteLLM eqi12",  layer:"AI_Compute_Runtime", stack:"shared",    tier:1, ha:"autoheal-restart",spof:false, alert:false, down:false, addr:"192.168.7.97:4000",    note:"Shared LLM gateway. Routes vLLM sparky1 (down) → cloud fallback." },
+  { id:"agent-letta",         label:"Letta",             layer:"AI_Compute_Runtime", stack:"dev_island",tier:1, ha:"single-node",    spof:false, alert:false, down:false, addr:":29205",               note:"dev_island agent spine. Also used by panopticon streaming worker (LETTA_RESPONDER_ID)." },
+  // ── DEV_ISLAND RESOURCES ─────────────────────────────────────────────────
+  { id:"db-dev-island",       label:"dev_island_db",     layer:"Resource",           stack:"dev_island",tier:0, ha:"single-node",    spof:true,  alert:false, down:false, addr:":29204",               note:"SPOF: 7 databases (brain, forge, mlflow, zot, letta, cowork, token_burn)." },
+  { id:"cache-dev-island-redis", label:"dev_island_redis", layer:"Resource",         stack:"dev_island",tier:0, ha:"single-node",    spof:true,  alert:false, down:false, addr:":29206",               note:"SPOF: task queue + event bus. Streams: tasks(134), episodes, openclaw_runs." },
+  { id:"store-dev-island-minio", label:"dev_island_minio", layer:"Resource",         stack:"dev_island",tier:1, ha:"single-node",    spof:false, alert:false, down:false, addr:":29211",               note:"S3 artifact store. Buckets: mlflow-artifacts, firmware, os-images." },
+  { id:"vault-dev-island",    label:"DI Vault",          layer:"Resource",           stack:"dev_island",tier:0, ha:"single-node",    spof:true,  alert:false, down:false, addr:":29209",               note:"SPOF: all dev_island runtime secrets. Auto-unseals." },
+  { id:"vector-dev-island",   label:"Qdrant",            layer:"AI_Resource",        stack:"dev_island",tier:1, ha:"single-node",    spof:false, alert:false, down:false, addr:":29202",               note:"Collections: codebase.embeddings, docs.offline, panopticon.feeds, training.datasets." },
+  { id:"store-dev-island-pypi", label:"devpi PyPI",      layer:"Resource",           stack:"dev_island",tier:2, ha:"single-node",    spof:false, alert:false, down:false, addr:":3141 via :29207",     note:"Pull-through PyPI cache." },
+  { id:"store-dev-island-registry", label:"Zot OCI",     layer:"Resource",           stack:"dev_island",tier:2, ha:"single-node",    spof:false, alert:false, down:false, addr:":29215",               note:"OCI pull-through: Docker Hub, ghcr.io, quay.io." },
+  { id:"registry-dev-island-mlflow", label:"MLflow (DI)", layer:"AI_Resource",       stack:"dev_island",tier:2, ha:"single-node",    spof:false, alert:false, down:false, addr:":29213",               note:"dev_island experiment tracking. Backend: dev_island_db. Artifacts: dev_island_minio." },
+  // ── DEV_ISLAND APPLICATIONS ──────────────────────────────────────────────
+  { id:"app-dev-island-mcp",  label:"MCP Server",        layer:"Application_Agent",  stack:"dev_island",tier:0, ha:"single-node",    spof:true,  alert:false, down:false, addr:":29210",               note:"SPOF: unified tool surface for all MCP clients. 15+ tools." },
+  { id:"app-dev-island-worker", label:"Stream Worker",   layer:"Application_Agent",  stack:"dev_island",tier:1, ha:"single-node",    spof:false, alert:false, down:false, addr:"bridges DI+Pano nets", note:"Async tasks + minio_watcher + panopticon event bridge (fixed 2026-06-08)." },
+  { id:"app-dev-island-forge", label:"Forgejo",          layer:"Application_Agent",  stack:"dev_island",tier:1, ha:"single-node",    spof:false, alert:false, down:false, addr:":29200/:2222",         note:"Sovereign Git. 30+ mirrored repos." },
+  { id:"app-dev-island-openclaw", label:"OpenClaw",      layer:"Application_Agent",  stack:"dev_island",tier:2, ha:"autoheal-restart",spof:false, alert:false, down:false, addr:"internal",            note:"Autonomous coding agent. Consumes code_task stream." },
+  { id:"app-dev-island-symphony", label:"Symphony",      layer:"Application_Agent",  stack:"dev_island",tier:2, ha:"single-node",    spof:false, alert:false, down:false, addr:":29240",               note:"Continuous improvement daemon. Polls Forgejo symphony:ready issues." },
+  { id:"app-dev-island-skills-sync", label:"Skills Sync", layer:"Application_Agent", stack:"dev_island",tier:3, ha:"single-node",    spof:false, alert:false, down:false, addr:"internal",            note:"Pulls ai_skills from GitHub every 6h. Indexes to Qdrant + brain." },
+  { id:"app-ob1-memory",      label:"OB1 Memory",        layer:"Application_Agent",  stack:"dev_island",tier:1, ha:"single-node",    spof:false, alert:false, down:false, addr:":4800",                note:"Governed MCP memory. ~900 thoughts. Trust invariant: user_confirmed=instruction-grade." },
+  { id:"app-dev-island-hermes", label:"Hermes Gateway",  layer:"Application_Agent",  stack:"dev_island",tier:2, ha:"single-node",    spof:false, alert:false, down:false, addr:":29241/:29242",        note:"Hermes agent gateway + dashboard. Secrets via Vault." },
+  { id:"obs-dev-island-prometheus", label:"Prometheus",  layer:"Application_Agent",  stack:"dev_island",tier:1, ha:"single-node",    spof:false, alert:false, down:false, addr:":29220",               note:"Fixed 2026-06-08: vllm job scrape_timeout>interval crash loop." },
+  { id:"obs-dev-island-grafana", label:"Grafana",        layer:"Application_Agent",  stack:"dev_island",tier:2, ha:"single-node",    spof:false, alert:false, down:false, addr:":29223",               note:"v13.0.1. Data sources: Prometheus, Loki, Tempo." },
+  { id:"obs-dev-island-alloy", label:"Alloy",            layer:"Application_Agent",  stack:"dev_island",tier:2, ha:"single-node",    spof:false, alert:false, down:false, addr:"internal",             note:"Unified collector: logs→Loki, metrics→Prom, OTel→Tempo." },
+  { id:"obs-dev-island-loki",  label:"Loki",             layer:"Application_Agent",  stack:"dev_island",tier:2, ha:"single-node",    spof:false, alert:false, down:false, addr:":29221",               note:"Log store." },
+  { id:"obs-dev-island-tempo", label:"Tempo",            layer:"Application_Agent",  stack:"dev_island",tier:2, ha:"single-node",    spof:false, alert:false, down:false, addr:":29222/:4317",         note:"Trace store. OTel receiver for both stacks." },
+  { id:"app-dev-island-token-burn", label:"Token Burn",  layer:"Application_Agent",  stack:"dev_island",tier:3, ha:"single-node",    spof:false, alert:false, down:false, addr:":29243",               note:"AI token usage dashboard across all tools." },
+  // ── PANOPTICON RESOURCES ─────────────────────────────────────────────────
+  { id:"db-panopticon-pg",    label:"panopticon_db",     layer:"Resource",           stack:"panopticon",tier:0, ha:"single-node",    spof:true,  alert:false, down:false, addr:"172.16.9.10:5432",     note:"SPOF: PostgreSQL 15+pgvector. 14GB. Databases: panopticon, mlflow, keycloak schema." },
+  { id:"db-pano-pgbouncer",   label:"pgBouncer txn",     layer:"Resource",           stack:"panopticon",tier:1, ha:"single-node",    spof:false, alert:false, down:false, addr:"panopticon_pgbouncer", note:"Transaction-mode pool. For API workers." },
+  { id:"mq-pano-redis",       label:"panopticon_redis",  layer:"Resource",           stack:"panopticon",tier:0, ha:"single-node",    spof:true,  alert:false, down:false, addr:"172.16.9.11:6379",     note:"SPOF: event bus + OAuth2 sessions. Exposed host:6379 for eqi12." },
+  { id:"store-pano-minio",    label:"panopticon_minio",  layer:"Resource",           stack:"panopticon",tier:1, ha:"single-node",    spof:false, alert:false, down:false, addr:"172.16.9.12:9000",     note:"Buckets: raw-feeds, documents, imagery, rf-captures, training-datasets, model-adapters, opencti-bucket." },
+  { id:"mq-pano-rabbitmq",    label:"RabbitMQ",          layer:"Resource",           stack:"panopticon",tier:1, ha:"single-node",    spof:false, alert:false, down:false, addr:"172.16.9.30:5672",     note:"AMQP for OpenCTI. Exposed host:5672 for eqi12." },
+  { id:"vault-pano-agent",    label:"Pano Vault Agent",  layer:"Resource",           stack:"panopticon",tier:0, ha:"single-node",    spof:true,  alert:false, down:false, addr:"panopticon_net",       note:"SPOF: secrets injection for all panopticon containers." },
+  // ── PANOPTICON AI RESOURCES ───────────────────────────────────────────────
+  { id:"graph-pano-falkordb", label:"FalkorDB",          layer:"AI_Resource",        stack:"panopticon",tier:1, ha:"single-node",    spof:false, alert:false, down:false, addr:"172.16.9.13 / VIP:6380", note:"36GB/noeviction. Graph: panopticon_graphrag. Persistence fixed 2026-05-27." },
+  { id:"search-pano-opensearch", label:"OpenSearch",     layer:"AI_Resource",        stack:"panopticon",tier:1, ha:"single-node",    spof:false, alert:false, down:false, addr:"172.16.9.28:9200",     note:"6GB. Full-text + vector search for threat intel + event index." },
+  { id:"registry-pano-mlflow", label:"MLflow (Pano)",   layer:"AI_Resource",         stack:"panopticon",tier:2, ha:"single-node",    spof:false, alert:false, down:false, addr:"172.16.9.39:5000",     note:"Training experiment tracking. Artifacts: MinIO model-adapters." },
+  { id:"geocode-pano-photon", label:"Photon geocoder",   layer:"AI_Compute_Runtime", stack:"panopticon",tier:2, ha:"single-node",    spof:false, alert:false, down:false, addr:"172.16.9.25:2322",     note:"Offline reverse geocoding. Fallback: OpenCage API." },
+  // ── PANOPTICON APPLICATIONS ───────────────────────────────────────────────
+  { id:"auth-pano-keycloak",  label:"Keycloak 26",       layer:"Application_Agent",  stack:"panopticon",tier:1, ha:"single-node",    spof:true,  alert:false, down:false, addr:"172.16.9.16:8080",     note:"SPOF: SSO for entire panopticon stack." },
+  { id:"auth-pano-oauth2proxy", label:"oauth2-proxy",    layer:"Application_Agent",  stack:"panopticon",tier:1, ha:"single-node",    spof:false, alert:false, down:false, addr:"172.16.9.17:4180",     note:"OIDC gateway. Sessions in Redis." },
+  { id:"api-pano-core",       label:"Panopticon API",    layer:"Application_Agent",  stack:"panopticon",tier:0, ha:"single-node",    spof:true,  alert:false, down:false, addr:"172.16.9.20:29001",    note:"SPOF: all 5 workers depend on it. 4GB. /health/db healthcheck." },
+  { id:"worker-pano-streaming", label:"W: streaming",   layer:"Application_Agent",   stack:"panopticon",tier:1, ha:"single-node",    spof:false, alert:false, down:false, addr:"172.16.9.21",          note:"ADS-B, AIS, APRS, FIRMS, RSS ingestion. 1.5GB." },
+  { id:"worker-pano-enrichment", label:"W: enrich",     layer:"Application_Agent",   stack:"panopticon",tier:1, ha:"single-node",    spof:false, alert:false, down:false, addr:"172.16.9.34",          note:"LLM enrichment pipeline. 3GB. Concurrency 6-40 adaptive." },
+  { id:"worker-pano-ingest",  label:"W: ingest",         layer:"Application_Agent",  stack:"panopticon",tier:1, ha:"single-node",    spof:false, alert:false, down:false, addr:"172.16.9.35",          note:"Document + feed ingest. 2GB." },
+  { id:"worker-pano-analysis", label:"W: analysis",     layer:"Application_Agent",   stack:"panopticon",tier:1, ha:"single-node",    spof:false, alert:false, down:false, addr:"172.16.9.36",          note:"NER, GraphRAG, translation, quality. 2GB." },
+  { id:"worker-pano-ops",     label:"W: ops",            layer:"Application_Agent",  stack:"panopticon",tier:2, ha:"single-node",    spof:false, alert:false, down:false, addr:"172.16.9.37",          note:"Housekeeping: expiry, cache, lab status." },
+  { id:"app-pano-directus",   label:"Directus CMS",      layer:"Application_Agent",  stack:"panopticon",tier:2, ha:"single-node",    spof:false, alert:false, down:false, addr:"172.16.9.15:8055",     note:"Headless CMS + data layer." },
+  { id:"app-pano-frontend",   label:"Pano Frontend",     layer:"Application_Agent",  stack:"panopticon",tier:1, ha:"single-node",    spof:true,  alert:false, down:false, addr:"172.16.9.22:29000",    note:"SPOF. React ops dashboard. TLS drewid.net." },
+  { id:"app-pano-terria",     label:"TerriaJS map",      layer:"Application_Agent",  stack:"panopticon",tier:2, ha:"single-node",    spof:false, alert:false, down:false, addr:"172.16.9.24:29009",    note:"Geospatial map viewer." },
+  { id:"app-pano-tiles",      label:"go-pmtiles",        layer:"Application_Agent",  stack:"panopticon",tier:3, ha:"single-node",    spof:false, alert:false, down:false, addr:"172.16.9.23:29002",    note:"Offline PMTiles basemap." },
+  { id:"intel-pano-opencti",  label:"OpenCTI",           layer:"Application_Agent",  stack:"panopticon",tier:2, ha:"autoheal-restart",spof:false, alert:false, down:false, addr:"eqi12:29016",         note:"Threat intel platform. eqi12 profile. OOM'd on NAS, stable on eqi12." },
+  { id:"intel-pano-opencti-worker", label:"OpenCTI worker", layer:"Application_Agent", stack:"panopticon",tier:2, ha:"autoheal-restart",spof:false, alert:false, down:false, addr:"eqi12",            note:"STIX import worker. eqi12 profile." },
+  { id:"stream-pano-benthos", label:"Benthos",           layer:"Application_Agent",  stack:"panopticon",tier:2, ha:"single-node",    spof:false, alert:false, down:false, addr:"eqi12:29014",          note:"Stream processor: Redis→OpenSearch. eqi12 profile." },
+  { id:"alert-pano-elastalert", label:"ElastAlert2",     layer:"Application_Agent",  stack:"panopticon",tier:2, ha:"autoheal-restart",spof:false, alert:false, down:false, addr:"eqi12",              note:"Alert rules on OpenSearch. eqi12 profile." },
+  { id:"mcp-pano-graph",      label:"Graph MCP",         layer:"Application_Agent",  stack:"panopticon",tier:2, ha:"single-node",    spof:false, alert:false, down:false, addr:"172.16.9.27:29012",    note:"FalkorDB MCP server. eqi12 profile." },
+  // ── NEW ENTITIES FROM PROMETHEUS CRAWL (2026-06-08) ─────────────────────────
+  { id:"host-truenas2",    label:"truenas2",            layer:"Infrastructure",     stack:"shared",   tier:2, ha:"single-node",    spof:false, alert:false, down:false, addr:"192.168.7.207",       note:"Secondary NAS (The Vault). node_exporter up. Role: off-site backup target." },
+  { id:"host-raspinoaa",   label:"raspinoaa Pi",        layer:"Infrastructure",     stack:"panopticon",tier:3, ha:"single-node",   spof:false, alert:false, down:false, addr:"192.168.4.34",        note:"Raspberry Pi. AIS-catcher SDR for vessel tracking. AISCATCHER_SSH_HOST in streaming worker. node_exporter up." },
+  { id:"host-officeheater",label:"officeheater (WS)",    layer:"Infrastructure",     stack:"shared",   tier:3, ha:"single-node",    spof:false, alert:false, down:false, addr:"192.168.7.206",       note:"Drew's Windows 11 dev workstation. Runs opencode, Claude Desktop, PowerShell, git. Primary operator console for all infrastructure. node_exporter_windows at :9182." },
+  { id:"host-compute-203", label:"Compute .203",        layer:"Infrastructure",     stack:"compute",  tier:1, ha:"single-node",    spof:false, alert:false, down:false, addr:"172.16.200.203",      note:"Unknown compute node on nvsync VPN. Has Ollama :9778 AND vLLM :8000. Not in SSH config — identity TBD." },
+  { id:"infer-vllm-sparka",label:"vLLM sparka",         layer:"AI_Compute_Runtime", stack:"compute",  tier:1, ha:"single-node",    spof:false, alert:false, down:false, addr:"172.16.200.166:8000", note:"vLLM on DGX Spark #2. Prometheus confirms up. Was incorrectly marked Tier-2/unused in prior map." },
+  { id:"infer-vllm-nuc1",  label:"vLLM nuc1",           layer:"AI_Compute_Runtime", stack:"compute",  tier:2, ha:"single-node",    spof:false, alert:true,  down:false, addr:"192.168.7.210:8000",  note:"vLLM on nuc1. Discovered via Prometheus crawl — not in prior map. GPUMemoryNearFull alert." },
+  { id:"app-pi-web",       label:"pi-web",              layer:"Application_Agent",  stack:"panopticon",tier:3, ha:"single-node",   spof:false, alert:false, down:false, addr:"pi-web:3200",         note:"pi-web service. Has 2 dedicated Grafana dashboards ('pi-web' + 'pi-web Operations'). Unknown function." },
+  { id:"net-ucg-max",      label:"UCG Max (gateway)",   layer:"Network",            stack:"shared",   tier:0, ha:"single-node",    spof:true,  alert:false, down:false, addr:"192.168.7.1",         note:"SPOF: Ubiquiti UCG Max — LAN gateway, firewall, internet uplink. All external access and inter-VLAN routing flows through this device. Monitored via unifi_poller." },
+  { id:"net-unifi-infra",  label:"UniFi L2 fabric",     layer:"Network",            stack:"shared",   tier:2, ha:"single-node",    spof:false, alert:false, down:false, addr:"managed switches + APs", note:"UniFi managed L2 infrastructure: switches + access points. Monitored via unifi_poller (:9130). 4 Grafana dashboards (UAP/USW/USG/Clients). unifi_poller scrape currently DOWN." },
+  // ── WORKSTATION (officeheater = Drew's Windows 11 dev machine) ─────────────
+  { id:"app-opencode",     label:"opencode / Claude",   layer:"Application_Agent",  stack:"dev_island", tier:1, ha:"single-node",  spof:false, alert:false, down:false, addr:"192.168.7.206",       note:"opencode (Claude Code) running on Windows 11 workstation. MCP client: dev-island, ob1-agent-memory, open-brain (Supabase). Model: GitHub Copilot claude-sonnet-4.6 (cloud) or LiteLLM /local (sparky1/nuc1). Plugins: @mlflow/opencode, unified-token-telemetry, context-mode, oh-my-openagent." },
+  { id:"app-truenas-mcp",  label:"truenas-mcp",         layer:"Application_Agent",  stack:"dev_island",tier:2, ha:"single-node",  spof:false, alert:false, down:false, addr:"internal",            note:"TrueNAS MCP server. Exposes TrueNAS management API as MCP tools (datasets, snapshots, pools). Running 5 weeks." },
+  { id:"app-dockge",       label:"Dockge",              layer:"Application_Agent",  stack:"shared",   tier:2, ha:"single-node",    spof:false, alert:false, down:false, addr:"192.168.7.205:31014", note:"Docker Compose stack manager UI. Manages all NAS stacks. ix-dockge-dockge-1." },
+  { id:"app-npm",          label:"Nginx Proxy Mgr",     layer:"Network",            stack:"shared",   tier:2, ha:"single-node",    spof:false, alert:false, down:false, addr:"192.168.7.205:31021/:31022", note:"Nginx Proxy Manager. HTTP :31021, Admin :31020, HTTPS :31022." },
+  { id:"app-archivebox",   label:"ArchiveBox",          layer:"Application_Agent",  stack:"dev_island",tier:3, ha:"single-node",   spof:false, alert:false, down:false, addr:"192.168.7.240:28000", note:"Web archival platform. archivebox:stable + archivebox_scheduler. VIP .240:28000. Referenced by dev_island_mcp ARCHIVEBOX_URL. archive-ctrl sidecar at :28090." },
+  { id:"stack-arr-media",  label:"arr / media stack",   layer:"Application_Agent",  stack:"media",    tier:3, ha:"single-node",    spof:false, alert:false, down:false, addr:":8096 Jellyfin :32400 Plex :8989 Sonarr :7878 Radarr :9696 Prowlarr", note:"Full media automation stack: Jellyfin (:8096), Plex (:32400), Sonarr (:8989), Radarr (:7878), Prowlarr (:9696), qBittorrent+VPN (:30080), SABnzbd (:30082), Bazarr, Jellyseerr (:5055), Listseerr, Spottarr, Profilarr, Cleanuparr, Metube, Newtarr, Unpackerr, FlareSolverr." },
+  // ── DELTA7 STACK ─────────────────────────────────────────────────────────
+  { id:"net-delta7-caddy", label:"Caddy (delta7)",      layer:"Network",            stack:"delta7",   tier:1, ha:"single-node",    spof:false, alert:false, down:false, addr:"eqi12:80/:443",       note:"Caddy v2 TLS termination for api.delta7.app. Let's Encrypt auto-cert. Routes → delta7_api:8001. HSTS + security headers." },
+  { id:"app-delta7-api",   label:"delta7 API",          layer:"Application_Agent",  stack:"delta7",   tier:2, ha:"autoheal-restart",spof:false, alert:false, down:false, addr:"eqi12:8001 (internal)", note:"FastAPI coaching application. API key auth (X-Delta7-Key). Allowed origins: delta7.app, drewid.duckdns.org, panopticon frontend." },
+  // ── SHARED EXTERNAL ──────────────────────────────────────────────────────
+  { id:"ext-github",      label:"GitHub",       layer:"External", stack:"external", tier:3, ha:"active-active",spof:false,alert:false,down:false, addr:"github.com",           note:"Skills repo source (dev_island 6h sync)" },
+  { id:"ext-openai-api",  label:"OpenAI API",   layer:"External", stack:"external", tier:2, ha:"active-active",spof:false,alert:false,down:false, addr:"api.openai.com",       note:"LLM fallback (both stacks via LiteLLM)" },
+  { id:"ext-anthropic-api", label:"Anthropic",  layer:"External", stack:"external", tier:2, ha:"active-active",spof:false,alert:false,down:false, addr:"api.anthropic.com",    note:"Claude API. Via LiteLLM + Hermes." },
+  { id:"ext-telegram-api", label:"Telegram",    layer:"External", stack:"external", tier:3, ha:"active-active",spof:false,alert:false,down:false, addr:"api.telegram.org",     note:"Alertmanager (dev_island) + Hermes notifications." },
+  { id:"ext-aprs-is",     label:"APRS-IS",      layer:"External", stack:"external", tier:3, ha:"active-active",spof:false,alert:false,down:false, addr:"rotate.aprs.net:14580",note:"Amateur radio position feed (panopticon streaming)" },
+  { id:"ext-firms-nasa",  label:"NASA FIRMS",   layer:"External", stack:"external", tier:3, ha:"active-active",spof:false,alert:false,down:false, addr:"firms.modaps.eosdis.nasa.gov", note:"Fire data API (panopticon streaming)" },
+  { id:"ext-opencage",    label:"OpenCage",     layer:"External", stack:"external", tier:3, ha:"active-active",spof:false,alert:false,down:false, addr:"api.opencagedata.com", note:"Geocoding fallback (panopticon photon)" },
+  { id:"ext-discord",     label:"Discord",      layer:"External", stack:"external", tier:3, ha:"active-active",spof:false,alert:false,down:false, addr:"discord.com/api",      note:"Alert notifications (panopticon workers)" },
+  { id:"ext-atproto",     label:"ATProto",      layer:"External", stack:"external", tier:3, ha:"active-active",spof:false,alert:false,down:false, addr:"bsky.social",               note:"Social feed source (panopticon streaming)" },
+  { id:"ext-pypi-org",    label:"PyPI.org",     layer:"External", stack:"external", tier:3, ha:"active-active",spof:false,alert:false,down:false, addr:"pypi.org",                  note:"devpi upstream (dev_island)" },
+  { id:"ext-delta7-app",  label:"delta7.app",   layer:"External", stack:"external", tier:2, ha:"active-active",spof:false,alert:false,down:false, addr:"api.delta7.app (public)",   note:"Public domain for delta7 coaching API. DELTA7_ALLOWED_ORIGINS includes delta7.app and drewid.duckdns.org." },
+  { id:"ext-letsencrypt", label:"Let's Encrypt",layer:"External", stack:"external", tier:2, ha:"active-active",spof:false,alert:false,down:false, addr:"acme-v02.api.letsencrypt.org", note:"ACME cert authority. Auto-renewed by delta7_caddy. TLS for api.delta7.app." },
+  { id:"ext-github-copilot", label:"GitHub Copilot", layer:"External", stack:"external", tier:1, ha:"active-active",spof:false,alert:false,down:false, addr:"api.githubcopilot.com", note:"Primary LLM for opencode sessions. claude-sonnet-4.6 via GitHub Copilot API. Token usage tracked via unified-token-telemetry plugin." },
+  { id:"ext-supabase-brain", label:"Supabase (open-brain)", layer:"External", stack:"external", tier:2, ha:"active-active",spof:false,alert:false,down:false, addr:"tlvxaunppafbulbxkmap.supabase.co", note:"open-brain MCP cloud endpoint. Personal/work observations synced across all AI clients (ChatGPT, Claude Desktop, opencode). Cross-device memory bridge." },
+  { id:"ext-internet",      label:"Internet uplink",      layer:"External", stack:"external", tier:0, ha:"N/A",           spof:true, alert:false, down:false, addr:"ISP / WAN",                note:"SPOF: internet uplink via UCG Max. Loss isolates the stack from external APIs (GitHub Copilot, Anthropic, Supabase, Let's Encrypt ACME, FIRMS, APRS-IS, ATProto)." },
+];
+
+const edges = [
+  // Shared infra
+  { source:"storage-nas1pool",      target:"host-nas-dxp4800",         type:"hard" },
+  { source:"storage-pano-pool",     target:"host-nas-dxp4800",         type:"hard" },
+  { source:"net-dev-island",        target:"host-nas-dxp4800",         type:"hard" },
+  { source:"net-panopticon",        target:"host-nas-dxp4800",         type:"hard" },
+  { source:"net-panopticon-vip",    target:"host-nas-dxp4800",         type:"hard" },
+  { source:"net-proxy-nginx",       target:"net-dev-island",           type:"hard" },
+  { source:"net-proxy-nginx",       target:"store-dev-island-pypi",    type:"hard" },
+  { source:"net-pano-frontend-nginx", target:"net-panopticon",         type:"hard" },
+  // Compute
+  { source:"infer-ollama-xai",      target:"host-xai",                 type:"hard" },
+  { source:"infer-ollama-nuc1",     target:"host-nuc1",                type:"hard" },
+  { source:"infer-vllm-sparky1",    target:"host-sparky1",             type:"hard" },
+  { source:"infer-vllm-sparky1",    target:"net-nvsync-vpn",           type:"hard" },
+  { source:"gateway-litellm-eqi12", target:"host-eqi12",              type:"hard" },
+  { source:"gateway-litellm-eqi12", target:"infer-vllm-sparky1",      type:"soft" },
+  { source:"gateway-litellm-eqi12", target:"ext-openai-api",          type:"soft" },
+  // dev_island resources
+  { source:"db-dev-island",         target:"net-dev-island",           type:"hard" },
+  { source:"db-dev-island",         target:"storage-nas1pool",         type:"hard" },
+  { source:"cache-dev-island-redis", target:"net-dev-island",         type:"hard" },
+  { source:"store-dev-island-minio", target:"net-dev-island",         type:"hard" },
+  { source:"store-dev-island-minio", target:"storage-nas1pool",       type:"hard" },
+  { source:"vault-dev-island",      target:"storage-nas1pool",         type:"hard" },
+  { source:"vector-dev-island",     target:"net-dev-island",           type:"hard" },
+  { source:"registry-dev-island-mlflow", target:"db-dev-island",      type:"hard" },
+  { source:"registry-dev-island-mlflow", target:"store-dev-island-minio", type:"hard" },
+  { source:"store-dev-island-registry", target:"cache-dev-island-redis", type:"soft" },
+  { source:"store-dev-island-pypi", target:"ext-pypi-org",            type:"soft" },
+  // dev_island letta
+  { source:"agent-letta",           target:"db-dev-island",            type:"hard" },
+  { source:"agent-letta",           target:"infer-vllm-sparky1",       type:"soft" },
+  { source:"agent-letta",           target:"infer-ollama-xai",         type:"soft" },
+  // dev_island apps
+  { source:"app-dev-island-mcp",    target:"db-dev-island",            type:"hard" },
+  { source:"app-dev-island-mcp",    target:"cache-dev-island-redis",   type:"hard" },
+  { source:"app-dev-island-mcp",    target:"vector-dev-island",        type:"hard" },
+  { source:"app-dev-island-mcp",    target:"agent-letta",              type:"soft" },
+  { source:"app-dev-island-mcp",    target:"app-dev-island-forge",     type:"soft" },
+  { source:"app-dev-island-mcp",    target:"store-dev-island-minio",   type:"soft" },
+  { source:"app-dev-island-mcp",    target:"infer-vllm-sparky1",       type:"soft" },
+  { source:"app-dev-island-mcp",    target:"gateway-litellm-eqi12",    type:"soft" },
+  { source:"app-dev-island-mcp",    target:"vault-dev-island",         type:"soft" },
+  { source:"app-dev-island-worker", target:"cache-dev-island-redis",   type:"hard" },
+  { source:"app-dev-island-worker", target:"store-dev-island-minio",   type:"soft" },
+  { source:"app-dev-island-worker", target:"mq-pano-redis",            type:"soft" },
+  { source:"app-dev-island-worker", target:"vector-dev-island",        type:"soft" },
+  { source:"app-dev-island-worker", target:"obs-dev-island-tempo",     type:"soft" },
+  { source:"app-dev-island-forge",  target:"db-dev-island",            type:"hard" },
+  { source:"app-dev-island-forge",  target:"storage-nas1pool",         type:"hard" },
+  { source:"app-dev-island-openclaw", target:"cache-dev-island-redis", type:"hard" },
+  { source:"app-dev-island-openclaw", target:"gateway-litellm-eqi12",  type:"hard" },
+  { source:"app-dev-island-openclaw", target:"app-dev-island-forge",   type:"hard" },
+  { source:"app-dev-island-symphony", target:"app-dev-island-forge",   type:"hard" },
+  { source:"app-dev-island-symphony", target:"gateway-litellm-eqi12",  type:"hard" },
+  { source:"app-dev-island-skills-sync", target:"db-dev-island",       type:"hard" },
+  { source:"app-dev-island-skills-sync", target:"vector-dev-island",   type:"hard" },
+  { source:"app-dev-island-skills-sync", target:"infer-ollama-xai",    type:"hard" },
+  { source:"app-dev-island-skills-sync", target:"ext-github",          type:"soft" },
+  { source:"app-ob1-memory",        target:"db-dev-island",            type:"hard" },
+  { source:"app-dev-island-hermes", target:"vault-dev-island",         type:"soft" },
+  { source:"app-dev-island-hermes", target:"ext-openai-api",           type:"soft" },
+  { source:"obs-dev-island-prometheus", target:"storage-nas1pool",     type:"hard" },
+  { source:"obs-dev-island-alloy",  target:"obs-dev-island-loki",      type:"hard" },
+  { source:"obs-dev-island-alloy",  target:"obs-dev-island-prometheus", type:"hard" },
+  { source:"obs-dev-island-alloy",  target:"obs-dev-island-tempo",     type:"hard" },
+  { source:"obs-dev-island-grafana", target:"obs-dev-island-prometheus", type:"hard" },
+  { source:"obs-dev-island-grafana", target:"obs-dev-island-loki",     type:"hard" },
+  { source:"obs-dev-island-grafana", target:"obs-dev-island-tempo",    type:"hard" },
+  { source:"app-dev-island-token-burn", target:"db-dev-island",        type:"hard" },
+  // panopticon resources
+  { source:"db-panopticon-pg",      target:"net-panopticon",           type:"hard" },
+  { source:"db-panopticon-pg",      target:"storage-pano-pool",        type:"hard" },
+  { source:"db-pano-pgbouncer",     target:"db-panopticon-pg",         type:"hard" },
+  { source:"mq-pano-redis",         target:"net-panopticon",           type:"hard" },
+  { source:"mq-pano-redis",         target:"storage-pano-pool",        type:"soft" },
+  { source:"store-pano-minio",      target:"net-panopticon",           type:"hard" },
+  { source:"store-pano-minio",      target:"storage-pano-pool",        type:"hard" },
+  { source:"mq-pano-rabbitmq",      target:"net-panopticon",           type:"hard" },
+  { source:"mq-pano-rabbitmq",      target:"storage-pano-pool",        type:"hard" },
+  { source:"vault-pano-agent",      target:"net-panopticon",           type:"hard" },
+  { source:"graph-pano-falkordb",   target:"net-panopticon",           type:"hard" },
+  { source:"graph-pano-falkordb",   target:"storage-pano-pool",        type:"hard" },
+  { source:"search-pano-opensearch", target:"net-panopticon",          type:"hard" },
+  { source:"search-pano-opensearch", target:"storage-pano-pool",       type:"hard" },
+  { source:"registry-pano-mlflow",  target:"db-panopticon-pg",         type:"hard" },
+  { source:"registry-pano-mlflow",  target:"store-pano-minio",         type:"hard" },
+  { source:"geocode-pano-photon",   target:"net-panopticon",           type:"hard" },
+  { source:"geocode-pano-photon",   target:"ext-opencage",             type:"soft" },
+  { source:"gateway-litellm-eqi12", target:"db-pano-pgbouncer",        type:"hard" },
+  // panopticon apps
+  { source:"auth-pano-keycloak",    target:"db-panopticon-pg",         type:"hard" },
+  { source:"auth-pano-keycloak",    target:"vault-pano-agent",         type:"soft" },
+  { source:"auth-pano-oauth2proxy", target:"auth-pano-keycloak",       type:"hard" },
+  { source:"auth-pano-oauth2proxy", target:"mq-pano-redis",            type:"hard" },
+  { source:"api-pano-core",         target:"db-pano-pgbouncer",        type:"hard" },
+  { source:"api-pano-core",         target:"mq-pano-redis",            type:"hard" },
+  { source:"api-pano-core",         target:"store-pano-minio",         type:"soft" },
+  { source:"api-pano-core",         target:"graph-pano-falkordb",      type:"soft" },
+  { source:"api-pano-core",         target:"gateway-litellm-eqi12",    type:"soft" },
+  { source:"worker-pano-streaming", target:"api-pano-core",            type:"hard" },
+  { source:"worker-pano-streaming", target:"geocode-pano-photon",      type:"soft" },
+  { source:"worker-pano-streaming", target:"gateway-litellm-eqi12",    type:"soft" },
+  { source:"worker-pano-streaming", target:"agent-letta",              type:"soft" },
+  { source:"worker-pano-streaming", target:"ext-aprs-is",              type:"soft" },
+  { source:"worker-pano-streaming", target:"ext-firms-nasa",           type:"soft" },
+  { source:"worker-pano-streaming", target:"ext-discord",              type:"soft" },
+  { source:"worker-pano-streaming", target:"ext-atproto",              type:"soft" },
+  { source:"worker-pano-enrichment", target:"api-pano-core",          type:"hard" },
+  { source:"worker-pano-enrichment", target:"gateway-litellm-eqi12",  type:"hard" },
+  { source:"worker-pano-enrichment", target:"geocode-pano-photon",    type:"soft" },
+  { source:"worker-pano-ingest",    target:"api-pano-core",            type:"hard" },
+  { source:"worker-pano-ingest",    target:"store-pano-minio",         type:"soft" },
+  { source:"worker-pano-ingest",    target:"gateway-litellm-eqi12",    type:"soft" },
+  { source:"worker-pano-analysis",  target:"api-pano-core",            type:"hard" },
+  { source:"worker-pano-analysis",  target:"graph-pano-falkordb",      type:"soft" },
+  { source:"worker-pano-analysis",  target:"gateway-litellm-eqi12",    type:"hard" },
+  { source:"worker-pano-ops",       target:"api-pano-core",            type:"hard" },
+  { source:"app-pano-directus",     target:"db-pano-pgbouncer",        type:"hard" },
+  { source:"app-pano-directus",     target:"store-pano-minio",         type:"soft" },
+  { source:"app-pano-frontend",     target:"api-pano-core",            type:"hard" },
+  { source:"app-pano-frontend",     target:"app-pano-terria",          type:"hard" },
+  { source:"app-pano-frontend",     target:"auth-pano-keycloak",       type:"hard" },
+  { source:"app-pano-terria",       target:"api-pano-core",            type:"hard" },
+  { source:"app-pano-terria",       target:"app-pano-tiles",           type:"soft" },
+  { source:"app-pano-tiles",        target:"storage-pano-pool",        type:"hard" },
+  { source:"intel-pano-opencti",    target:"mq-pano-redis",            type:"hard" },
+  { source:"intel-pano-opencti",    target:"search-pano-opensearch",   type:"hard" },
+  { source:"intel-pano-opencti",    target:"store-pano-minio",         type:"hard" },
+  { source:"intel-pano-opencti",    target:"mq-pano-rabbitmq",         type:"hard" },
+  { source:"intel-pano-opencti",    target:"db-panopticon-pg",         type:"hard" },
+  { source:"intel-pano-opencti-worker", target:"intel-pano-opencti",   type:"hard" },
+  { source:"stream-pano-benthos",   target:"mq-pano-redis",            type:"hard" },
+  { source:"stream-pano-benthos",   target:"search-pano-opensearch",   type:"hard" },
+  { source:"stream-pano-benthos",   target:"mq-pano-rabbitmq",         type:"soft" },
+  { source:"alert-pano-elastalert", target:"search-pano-opensearch",   type:"hard" },
+  { source:"mcp-pano-graph",        target:"api-pano-core",            type:"hard" },
+  // New nodes discovered from Prometheus crawl
+  { source:"host-compute-203",      target:"net-nvsync-vpn",           type:"hard" },
+  { source:"infer-vllm-sparka",     target:"host-sparka",              type:"hard" },
+  { source:"infer-vllm-nuc1",       target:"host-nuc1",                type:"hard" },
+  { source:"app-pi-web",            target:"host-raspinoaa",           type:"hard" },
+  { source:"worker-pano-streaming", target:"host-raspinoaa",           type:"soft" },
+  // delta7
+  { source:"net-delta7-caddy",      target:"host-eqi12",               type:"hard" },
+  { source:"net-delta7-caddy",      target:"ext-delta7-app",           type:"hard" },
+  { source:"net-delta7-caddy",      target:"ext-letsencrypt",          type:"soft" },
+  { source:"app-delta7-api",        target:"net-delta7-caddy",         type:"hard" },
+  { source:"app-delta7-api",        target:"gateway-litellm-eqi12",    type:"hard" },
+  // additional services
+  { source:"app-archivebox",        target:"host-nas-dxp4800",         type:"hard" },
+  { source:"app-archivebox",        target:"storage-nas1pool",         type:"hard" },
+  { source:"app-truenas-mcp",       target:"host-nas-dxp4800",         type:"hard" },
+  { source:"app-dockge",            target:"host-nas-dxp4800",         type:"hard" },
+  { source:"app-npm",               target:"host-nas-dxp4800",         type:"hard" },
+  { source:"stack-arr-media",       target:"host-nas-dxp4800",         type:"hard" },
+  { source:"stack-arr-media",       target:"storage-nas1pool",         type:"hard" },
+  // workstation → infrastructure (MCP client connections)
+  { source:"app-opencode",          target:"host-officeheater",        type:"hard" },
+  { source:"app-opencode",          target:"app-dev-island-mcp",       type:"hard" },
+  { source:"app-opencode",          target:"app-ob1-memory",           type:"hard" },
+  { source:"app-opencode",          target:"ext-supabase-brain",       type:"soft" },
+  { source:"app-opencode",          target:"gateway-litellm-eqi12",    type:"soft" },
+  { source:"app-opencode",          target:"ext-github-copilot",       type:"soft" },
+  { source:"app-opencode",          target:"registry-dev-island-mlflow", type:"soft" },
+  { source:"app-opencode",          target:"app-dev-island-forge",     type:"soft" },
+  // network — UCG Max as gateway for all hosts
+  { source:"net-ucg-max",           target:"ext-internet",             type:"hard" },
+  { source:"net-unifi-infra",       target:"net-ucg-max",              type:"hard" },
+  { source:"host-nas-dxp4800",      target:"net-ucg-max",              type:"hard" },
+  { source:"host-eqi12",            target:"net-ucg-max",              type:"hard" },
+  { source:"host-xai",              target:"net-ucg-max",              type:"hard" },
+  { source:"host-nuc1",             target:"net-ucg-max",              type:"hard" },
+  { source:"host-officeheater",     target:"net-ucg-max",              type:"hard" },
+];
+
+// ── PROMETHEUS LIVE MONITORING ────────────────────────────────────────────────
+// Crawled from http://192.168.7.205:29220 on 2026-06-08
+// 46 scrape targets · 80 alert rules · 5 pending alerts
+
+const PROMETHEUS_URL = "http://192.168.7.205:29220";
+const POLL_INTERVAL  = 30000;
+
+// alertname (+ optional |instance) → entity_id
+const ALERT_MAP = {
+  "VLLMNodeDown|172.16.200.165:8000": "infer-vllm-sparky1",
+  "VLLMNodeDown|172.16.200.165:8101": "infer-vllm-sparky1",
+  "VLLMNodeDown|172.16.200.166:8000": "infer-vllm-sparka",
+  "VLLMNodeDown|192.168.7.210:8000":  "infer-vllm-nuc1",
+  "VLLMHighQueueDepth|172.16.200.165:8000": "infer-vllm-sparky1",
+  "VLLMHighTTFTLatency|172.16.200.165:8000": "infer-vllm-sparky1",
+  "VLLMKVCacheNearFull|172.16.200.165:8000": "infer-vllm-sparky1",
+  "InferenceNodeSwapThrashing|172.16.200.165:9100": "host-sparky1",
+  "InferenceNodeOOMKill|172.16.200.165:9100": "host-sparky1",
+  "OllamaNodeDown|192.168.7.190:9778": "infer-ollama-xai",
+  "OllamaNodeDown|192.168.7.210:9778": "infer-ollama-nuc1",
+  "OllamaNodeDown|172.16.200.203:9778": "host-compute-203",
+  "ComputeNodeUnreachable|192.168.7.190:9100": "host-xai",
+  "ComputeNodeUnreachable|192.168.7.210:9100": "host-nuc1",
+  "ComputeNodeUnreachable|172.16.200.165:9100": "host-sparky1",
+  "ComputeNodeUnreachable|172.16.200.166:9100": "host-sparka",
+  "ComputeNodeUnreachable|172.16.200.203:9100": "host-compute-203",
+  "PanopticonComputeNodeUnreachable|192.168.7.97:9100": "host-eqi12",
+  "GPUMemoryNearFull|192.168.7.210:9835": "host-nuc1",
+  "GPUMemoryNearFull|192.168.7.190:9835": "host-xai",
+  "GPUMemoryNearFull|172.16.200.165:9835": "host-sparky1",
+  "GPUHighTemperature|192.168.7.210:9835": "host-nuc1",
+  "GPUHighTemperature|192.168.7.190:9835": "host-xai",
+  "GPUCriticalTemperature|172.16.200.165:9835": "host-sparky1",
+  "HostHighMemoryPressure|192.168.7.205:9100": "host-nas-dxp4800",
+  "HostHighMemoryPressure|192.168.7.97:9100": "host-eqi12",
+  "HostDiskFillingFast|192.168.7.97:9100": "host-eqi12",
+  "ComputeNodeHighCPU|192.168.7.205:9100": "host-nas-dxp4800",
+  "MCPDown": "app-dev-island-mcp",
+  "MCPHighErrorRate": "app-dev-island-mcp",
+  "EventBridgeWorkerDown": "app-dev-island-worker",
+  "EventBridgeConsumerLag": "app-dev-island-worker",
+  "EventBridgeConsumerLagCritical": "app-dev-island-worker",
+  "EventBridgeDLQDepth": "app-dev-island-worker",
+  "EventBridgeDLQDepthCritical": "app-dev-island-worker",
+  "ForgejoDown": "app-dev-island-forge",
+  "VaultSealed": "vault-dev-island",
+  "VaultHighRequestLatency": "vault-dev-island",
+  "TempoIngestionStopped": "obs-dev-island-tempo",
+  "PostgresDevIslandDown": "db-dev-island",
+  "PostgresDevIslandHighConnections": "db-dev-island",
+  "RedisDevIslandDown": "cache-dev-island-redis",
+  "RedisDevIslandHighMemory": "cache-dev-island-redis",
+  "RedisDevIslandEvictions": "cache-dev-island-redis",
+  "QdrantDown": "vector-dev-island",
+  "QdrantHighSearchLatency": "vector-dev-island",
+  "QdrantHighErrorRate": "vector-dev-island",
+  "HermesGatewayProbeFailed": "app-dev-island-hermes",
+  "HermesDashboardProbeFailed": "app-dev-island-hermes",
+  "PanopticonAPIDown": "api-pano-core",
+  "PanopticonDBDown": "db-panopticon-pg",
+  "PanopticonDBUnhealthy": "db-panopticon-pg",
+  "PanopticonPostgresConnectionsHigh": "db-panopticon-pg",
+  "PanopticonKeycloakCrashLooping": "auth-pano-keycloak",
+  "PanopticonKeycloakUnhealthy": "auth-pano-keycloak",
+  "PanopticonPgBouncerSessionUnhealthy": "db-pano-pgbouncer-session",
+  "PanopticonEventStreamBacklogHigh": "mq-pano-redis",
+  "RedisPanopticonDown": "mq-pano-redis",
+  "RedisPanopticonHighMemory": "mq-pano-redis",
+  "OpenSearchClusterRed": "search-pano-opensearch",
+  "OpenSearchClusterYellowProlonged": "search-pano-opensearch",
+  "LiteLLMUpstreamFailureRateCritical": "gateway-litellm-eqi12",
+  "LiteLLMGatewayScrapeDown": "gateway-litellm-eqi12",
+  "BenthosOutputErrors": "stream-pano-benthos",
+  "BenthosCriticalOutputErrors": "stream-pano-benthos",
+  "PanopticonWorkerErrorRateCritical": "worker-pano-streaming",
+  "PanopticonWorkerHighLatency": "worker-pano-enrichment",
+  // UniFi / network
+  "GatewayDown":              "net-ucg-max",
+  "UplinkDown":               "net-ucg-max",
+  "InternetConnectivityLost": "net-ucg-max",
+};
+
+// Prometheus `up` instance label → entity_id
+const UP_MAP = {
+  "192.168.7.205:9100":   "host-nas-dxp4800",
+  "192.168.7.97:9100":    "host-eqi12",
+  "192.168.7.190:9100":   "host-xai",
+  "192.168.7.210:9100":   "host-nuc1",
+  "172.16.200.165:9100":  "host-sparky1",
+  "172.16.200.166:9100":  "host-sparka",
+  "172.16.200.203:9100":  "host-compute-203",
+  "192.168.7.207:9100":   "host-truenas2",
+  "192.168.4.34:9100":    "host-raspinoaa",
+  "172.16.200.165:8000":  "infer-vllm-sparky1",
+  "172.16.200.165:8101":  "infer-vllm-sparky1",
+  "172.16.200.166:8000":  "infer-vllm-sparka",
+  "192.168.7.210:8000":   "infer-vllm-nuc1",
+  "192.168.7.190:9778":   "infer-ollama-xai",
+  "192.168.7.210:9778":   "infer-ollama-nuc1",
+  "172.16.200.203:9778":  "host-compute-203",
+  "192.168.7.97:4000":    "gateway-litellm-eqi12",
+  "dev_island_mcp:8000":  "app-dev-island-mcp",
+  "dev_island_forge:3000": "app-dev-island-forge",
+  "dev_island_grafana:3000": "obs-dev-island-grafana",
+  "dev_island_loki:3100": "obs-dev-island-loki",
+  "dev_island_tempo:3200": "obs-dev-island-tempo",
+  "dev_island_alloy:12345": "obs-dev-island-alloy",
+  "dev_island_vault:8200": "vault-dev-island",
+  "dev_island_vector:6333": "vector-dev-island",
+  "dev_island_symphony:8080": "app-dev-island-symphony",
+  "dev_island_uptime_kuma:3001": "app-dev-island-token-burn",
+  "192.168.7.205:29211":  "store-dev-island-minio",
+  "192.168.7.205:29007":  "store-pano-minio",
+  "localhost:9090":        "obs-dev-island-prometheus",
+  "192.168.7.97:29001":   "api-pano-core",
+  "192.168.7.205:15692":  "mq-pano-rabbitmq",
+  "monitoring_redis_exporter_dev_island:9121": "cache-dev-island-redis",
+  "monitoring_redis_exporter_panopticon:9121": "mq-pano-redis",
+  "monitoring_redis_exporter_falkordb:9121":   "graph-pano-falkordb",
+  "monitoring_pg_exporter_dev_island:9187":    "db-dev-island",
+  "monitoring_pg_exporter_panopticon:9187":    "db-panopticon-pg",
+  "http://dev_island_hermes_gateway:8642/health": "app-dev-island-hermes",
+  "http://192.168.7.97:29001/health/db":       "api-pano-core",
+};
+const layerColor = {"Infrastructure":"#6e7681","Network":"#3fb950","Resource":"#388bfd","AI_Resource":"#bc8cff","AI_Compute_Runtime":"#ff7b72","Application_Agent":"#e3b341","External":"#8b949e"};
+const layerRadius = {"Infrastructure":16,"Network":12,"Resource":14,"AI_Resource":13,"AI_Compute_Runtime":14,"Application_Agent":10,"External":9};
+const layerY = {"Infrastructure":0.09,"Network":0.21,"Resource":0.35,"AI_Resource":0.49,"AI_Compute_Runtime":0.61,"Application_Agent":0.78,"External":0.92};
+// Stack x-grouping: push DI nodes left, Pano nodes right, shared center
+const stackX = { "dev_island":-0.22, "panopticon":0.22, "shared":0, "compute":0, "external":0 };
+
+const svg = d3.select("#graph");
+const W = window.innerWidth, H = window.innerHeight;
+const g = svg.append("g").attr("transform","translate(0,78)");
+const zoom = d3.zoom().scaleExtent([0.1,4]).on("zoom",e=>g.attr("transform",`translate(${e.transform.x},${e.transform.y+78}) scale(${e.transform.k})`));
+svg.call(zoom);
+const defs = svg.append("defs");
+["hard","soft"].forEach(t=>{defs.append("marker").attr("id",`arrow-${t}`).attr("viewBox","0 -4 8 8").attr("refX",18).attr("refY",0).attr("markerWidth",4).attr("markerHeight",4).attr("orient","auto").append("path").attr("d","M0,-4L8,0L0,4").attr("fill",t==="hard"?"#58a6ff":"#8b949e").attr("opacity",0.5);});
+
+const sim = d3.forceSimulation(nodes)
+  .force("link", d3.forceLink(edges).id(d=>d.id).distance(60).strength(0.25))
+  .force("charge", d3.forceManyBody().strength(-200))
+  .force("center", d3.forceCenter(W/2,(H-80)/2))
+  .force("collision", d3.forceCollide(d=>layerRadius[d.layer]+12))
+  .force("y", d3.forceY(d=>(H-80)*layerY[d.layer]).strength(0.3))
+  .force("x", d3.forceX(d=>W/2 + W*(stackX[d.stack]||0)).strength(0.12));
+
+const link = g.append("g").attr("class","links").selectAll("line").data(edges).join("line")
+  .attr("class",d=>`link ${d.type}`)
+  .attr("stroke",d=>d.type==="hard"?"#58a6ff":"#6e7681")
+  .attr("stroke-width",d=>d.type==="hard"?1.0:0.8)
+  .attr("stroke-dasharray",d=>d.type==="soft"?"5,3":null)
+  .attr("marker-end",d=>`url(#arrow-${d.type})`);
+
+const node = g.append("g").attr("class","nodes").selectAll("g").data(nodes).join("g")
+  .attr("class",d=>`node${d.spof?" spof":""}${d.alert?" alert":""}${d.down?" down":""}`)
+  .call(d3.drag()
+    .on("start",(e,d)=>{if(!e.active)sim.alphaTarget(0.3).restart();d.fx=d.x;d.fy=d.y;})
+    .on("drag",(e,d)=>{d.fx=e.x;d.fy=e.y;})
+    .on("end",(e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null;}))
+  .on("mouseover",showTooltip).on("mousemove",moveTooltip).on("mouseout",hideTooltip);
+
+// Outer ring (stack colour)
+node.append("circle")
+  .attr("r",d=>layerRadius[d.layer]+3)
+  .attr("fill","none")
+  .attr("stroke",d=>stackColor[d.stack]||"#8b949e")
+  .attr("stroke-width",2)
+  .attr("stroke-opacity",0.6);
+
+// Inner fill (layer colour)
+node.append("circle")
+  .attr("r",d=>layerRadius[d.layer])
+  .attr("fill",d=>layerColor[d.layer])
+  .attr("fill-opacity",d=>d.down?0.3:0.85)
+  .attr("stroke",d=>{if(d.spof&&d.alert)return"#f0883e";if(d.spof)return"#f85149";if(d.alert)return"#f0883e";return d3.color(layerColor[d.layer]).darker(0.5);})
+  .attr("stroke-width",d=>(d.spof||d.alert)?2.5:1.5);
+
+let labelsVisible=true;
+const labels=node.append("text").attr("dx",d=>layerRadius[d.layer]+5).attr("dy","0.35em").text(d=>d.label);
+
+sim.on("tick",()=>{
+  link.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y).attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+  node.attr("transform",d=>`translate(${d.x},${d.y})`);
+});
+
+const tt=document.getElementById("tooltip");
+function showTooltip(e,d){
+  const inE=edges.filter(l=>(l.target.id||l.target)===d.id).map(l=>l.source.label||l.source);
+  const outE=edges.filter(l=>(l.source.id||l.source)===d.id).map(l=>l.target.label||l.target);
+  const sc=stackColor[d.stack]||"#8b949e";
+  tt.innerHTML=`<div class="tt-name">${d.label}</div><span class="tt-stack" style="background:${sc}22;color:${sc};border:1px solid ${sc}44">${d.stack}</span><div class="tt-row">Layer: <span>${d.layer}</span></div><div class="tt-row">Tier: <span>Tier-${d.tier}</span></div><div class="tt-row">HA: <span>${d.ha}</span></div><div class="tt-row">Address: <span>${d.addr}</span></div>${inE.length?`<div class="tt-row">⬅ Deps on: <span>${inE.slice(0,5).join(", ")}${inE.length>5?"…":""}</span></div>`:""}${outE.length?`<div class="tt-row">➡ Used by: <span>${outE.slice(0,5).join(", ")}${outE.length>5?"…":""}</span></div>`:""}${d.note?`<div class="tt-notes">${d.note}</div>`:""}`;
+  tt.style.display="block";moveTooltip(e);
+}
+function moveTooltip(e){const x=e.clientX+14,y=e.clientY-10;tt.style.left=(x+340>window.innerWidth?x-360:x)+"px";tt.style.top=(y+220>window.innerHeight?y-240:y)+"px";}
+function hideTooltip(){tt.style.display="none";}
+function resetZoom(){svg.transition().duration(600).call(zoom.transform,d3.zoomIdentity);}
+function toggleLabels(){labelsVisible=!labelsVisible;labels.style("display",labelsVisible?null:"none");}
+
+// ── MULTI-SELECT FILTER ───────────────────────────────────────────────────────
+// visibleStacks: set of stack values currently checked
+// spofOnly: boolean overlay (highlights SPOFs across visible stacks)
+let spofOnly = false;
+
+function activeStacks() {
+  return new Set(
+    ["dev_island","panopticon","shared","compute","external","delta7","media"]
+      .filter(s => document.getElementById("cb-"+s)?.checked)
+  );
+}
+
+function applyVisibility() {
+  const vis = activeStacks();
+  const nodeVisible = d => vis.has(d.stack) && (!spofOnly || d.spof);
+
+  node.style("opacity", d => nodeVisible(d) ? 1 : 0.05);
+
+  link.style("opacity", l => {
+    const sn = nodes.find(n => n.id === (l.source.id || l.source));
+    const tn = nodes.find(n => n.id === (l.target.id || l.target));
+    if (!sn || !tn) return 0.03;
+    // show edge only if BOTH endpoints are visible
+    const bothVis = nodeVisible(sn) && nodeVisible(tn);
+    // dim edges where only one side is in the visible set (cross-stack boundary)
+    const crossStack = vis.has(sn.stack) !== vis.has(tn.stack);
+    if (!bothVis) return 0.03;
+    return crossStack ? 0.2 : 0.4;
+  });
+}
+
+function onCbChange() {
+  spofOnly = false;
+  applyVisibility();
+}
+
+function preset(name) {
+  spofOnly = false;
+  const cbs = { dev_island:false, panopticon:false, shared:false, compute:false, external:false, delta7:false, media:false };
+  if (name==="all")  { Object.keys(cbs).forEach(k=>cbs[k]=true); }
+  else if (name==="di")   { cbs.dev_island=true; cbs.shared=true; cbs.compute=true; }
+  else if (name==="pano") { cbs.panopticon=true; cbs.shared=true; cbs.compute=true; }
+  else if (name==="ai")   { cbs.dev_island=true; cbs.panopticon=true; cbs.shared=true; cbs.compute=true; }
+  else if (name==="delta7only") { cbs.delta7=true; cbs.compute=true; cbs.external=true; }
+  else if (name==="spof") { Object.keys(cbs).forEach(k=>cbs[k]=true); spofOnly=true; }
+  Object.keys(cbs).forEach(k => {
+    const el = document.getElementById("cb-"+k);
+    if (el) el.checked = cbs[k];
+  });
+  applyVisibility();
+}
+
+window.addEventListener("resize",()=>{
+  sim.force("center",d3.forceCenter(window.innerWidth/2,(window.innerHeight-80)/2))
+     .force("x",d3.forceX(d=>window.innerWidth/2+window.innerWidth*(stackX[d.stack]||0)).strength(0.12))
+     .alpha(0.3).restart();
+});
+
+// ── THEME ─────────────────────────────────────────────────────────────────────
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.dataset.theme === "dark";
+  html.dataset.theme = isDark ? "light" : "dark";
+  document.getElementById("theme-btn").textContent = isDark ? "🌙 Dark" : "☀ Light";
+  // refresh D3 link strokes to pick up --link-hard / --link-soft token changes
+  const style = getComputedStyle(html);
+  const hardColor = style.getPropertyValue("--link-hard").trim();
+  const softColor = style.getPropertyValue("--link-soft").trim();
+  link.attr("stroke", d => d.type === "hard" ? hardColor : softColor);
+  // marker fill
+  d3.selectAll("marker#arrow-hard path").attr("fill", hardColor);
+  d3.selectAll("marker#arrow-soft path").attr("fill", softColor);
+}
+
+// ── LIVE MONITORING ───────────────────────────────────────────────────────────
+// ALERT_MAP, UP_MAP, PROMETHEUS_URL and POLL_INTERVAL defined above
+// (crawled from Prometheus 2026-06-08, 46 targets · 80 alert rules)
+
+let liveEnabled   = false;
+let liveTimer     = null;
+
+async function fetchLiveStatus() {
+  try {
+    // ── 1. Firing alerts ──────────────────────────────────────────────────
+    const alertResp = await fetch(`${PROMETHEUS_URL}/api/v1/alerts`);
+    const alertData = await alertResp.json();
+    const firingIds = new Set();
+    for (const a of (alertData?.data?.alerts || [])) {
+      if (a.state !== "firing") continue;
+      const name     = a.labels?.alertname || "";
+      const instance = a.labels?.instance  || "";
+      const key1 = `${name}|${instance}`;
+      const key2 = name;
+      const nodeId = ALERT_MAP[key1] || ALERT_MAP[key2];
+      if (nodeId) firingIds.add(nodeId);
+    }
+
+    // ── 2. Up/down targets ────────────────────────────────────────────────
+    const upResp = await fetch(`${PROMETHEUS_URL}/api/v1/query?query=up`);
+    const upData = await upResp.json();
+    const downIds = new Set();
+    for (const r of (upData?.data?.result || [])) {
+      if (parseFloat(r.value?.[1]) === 0) {
+        const inst = r.metric?.instance || "";
+        const nodeId = UP_MAP[inst];
+        if (nodeId) downIds.add(nodeId);
+      }
+    }
+
+    // ── 3. Apply to node data + re-render ─────────────────────────────────
+    nodes.forEach(n => {
+      n.alert = firingIds.has(n.id);
+      n.down  = downIds.has(n.id);
+    });
+    redrawNodeStates();
+
+    // ── 4. Update header status ───────────────────────────────────────────
+    const ts = new Date().toLocaleTimeString();
+    const badge = document.getElementById("live-status");
+    badge.style.background  = "rgba(63,185,80,0.15)";
+    badge.style.borderColor = "rgba(63,185,80,0.4)";
+    badge.style.color       = "#3fb950";
+    badge.textContent = `● LIVE  ${firingIds.size} alert${firingIds.size!==1?"s":""} · ${downIds.size} down · ${ts}`;
+
+    // Update alerts banner with live firing names
+    const firingNames = [...new Set(
+      (alertData?.data?.alerts || [])
+        .filter(a => a.state === "firing")
+        .map(a => a.labels?.alertname || "?")
+    )];
+    const banner = document.getElementById("alerts-banner");
+    if (firingNames.length) {
+      banner.style.display = "flex";
+      banner.innerHTML = `<span style="color:#f85149;font-weight:600">⚠ LIVE:</span>
+        ${firingNames.map(n=>`<span class="alert-tag">${n}</span>`).join("")}`;
+    } else {
+      banner.style.display = "none";
+    }
+
+  } catch (err) {
+    console.warn("Live status fetch failed:", err);
+    document.getElementById("live-status").style.background  = "rgba(248,81,73,0.1)";
+    document.getElementById("live-status").style.borderColor = "rgba(248,81,73,0.4)";
+    document.getElementById("live-status").style.color       = "#f85149";
+    document.getElementById("live-status").textContent       = "⚠ LIVE — fetch failed";
+  }
+}
+
+function redrawNodeStates() {
+  // Recompute classes + inner-circle stroke based on updated node state
+  d3.selectAll(".node")
+    .each(function(d) {
+      const el = d3.select(this);
+      el.classed("spof",  d.spof)
+        .classed("alert", d.alert)
+        .classed("down",  d.down);
+    });
+  d3.selectAll(".node circle:nth-child(2)")
+    .attr("fill-opacity", d => d.down ? 0.3 : 0.85)
+    .attr("stroke", d => {
+      if (d.spof && d.alert) return "#f0883e";
+      if (d.spof)  return "#f85149";
+      if (d.alert) return "#f0883e";
+      return d3.color(layerColor[d.layer]).darker(0.5);
+    });
+  // Re-apply visibility filter so newly-downed nodes respect current filter
+  applyVisibility();
+}
+
+function toggleLive() {
+  liveEnabled = !liveEnabled;
+  const btn    = document.getElementById("live-btn");
+  const badge  = document.getElementById("live-status");
+  if (liveEnabled) {
+    btn.style.color = "#3fb950";
+    btn.style.borderColor = "#3fb950";
+    badge.style.display = "inline-block";
+    fetchLiveStatus();
+    liveTimer = setInterval(fetchLiveStatus, POLL_INTERVAL);
+  } else {
+    clearInterval(liveTimer);
+    liveTimer = null;
+    btn.style.color = "";
+    btn.style.borderColor = "";
+    badge.style.display = "none";
+  }
+}
+</script>
+</body>
+</html>
