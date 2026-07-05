@@ -158,7 +158,7 @@ Final Verification:
 
 ## TODOs
 
-- [ ] 1. Extract Claude Code session data from opencode
+- [x] 1. Extract Claude Code session data from opencode
 
   **What to do**:
   - Call `session_list` with high limit to get ALL available sessions
@@ -213,7 +213,7 @@ Final Verification:
 
   **Commit**: NO (intermediate data, not deployed)
 
-- [ ] 2. Update dashboard source column schema
+- [x] 2. Update dashboard source column schema
 
   **What to do**:
   - SSH to TrueNAS, locate dashboard source at `/mnt/NAS1Pool/stacks/dev_island/images/token-burn/`
@@ -275,7 +275,7 @@ Final Verification:
   - Files: source column config + any referencing components
   - Pre-commit: `npm run build` passes
 
-- [ ] 3. Collect Anthropic + Copilot usage estimates from user
+- [x] 3. Collect Anthropic + Copilot usage estimates from user
 
   **What to do**:
   - Interview user about their usage patterns for the date range (May 17 – Jun 6):
@@ -321,7 +321,7 @@ Final Verification:
 
   **Commit**: NO (intermediate data)
 
-- [ ] 4. Normalize all sources into daily-burn.json
+- [x] 4. Normalize all sources into daily-burn.json
 
   **What to do**:
   - Combine outputs from Tasks 1 and 3 into unified daily rows
@@ -379,7 +379,7 @@ Final Verification:
 
   **Commit**: NO (intermediate data)
 
-- [ ] 5. Privacy scrub + validate JSON schema
+- [x] 5. Privacy scrub + validate JSON schema
 
   **What to do**:
   - Grep daily-burn.json for forbidden patterns: file paths, email addresses, client names, repo names, API keys
@@ -419,7 +419,7 @@ Final Verification:
   - Files: daily-burn.json
   - Pre-commit: JSON is valid
 
-- [ ] 6. Rebuild dashboard with real data
+- [x] 6. Rebuild dashboard with real data
 
   **What to do**:
   - Copy validated daily-burn.json to the dashboard data directory on TrueNAS
@@ -469,7 +469,7 @@ Final Verification:
   - Message: `chore(token-burn): rebuild and deploy with real data`
   - Files: Dockerfile or build artifacts on TrueNAS
 
-- [ ] 7. Verify deployed dashboard end-to-end
+- [x] 7. Verify deployed dashboard end-to-end
 
   **What to do**:
   - Load http://192.168.7.205:29243/ and verify all 5 views render:
@@ -516,7 +516,7 @@ Final Verification:
 
 ## Final Verification Wave
 
-- [ ] F1. **End-to-end dashboard verification** — `oracle`
+- [x] F1. **End-to-end dashboard verification** — `oracle`
 
   Read daily-burn.json. Verify: all dates present (no gaps in range), totals sum correctly, fidelity labels match sourceColumns, driver field non-empty for high-burn days. Then curl http://192.168.7.205:29243/ and verify all 5 views render. Check no sample data remnants (no "codex_tokens", no "chatgpt_est" keys).
 
