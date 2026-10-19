@@ -77,6 +77,7 @@ Works with Claude Code, Cursor, Codex CLI, Windsurf, and any tool that reads `SK
 | [training-pipeline](training-pipeline/SKILL.md) | 75 | LoRA/QLoRA fine-tuning, hyperparameters, DeepSpeed, experiment tracking |
 | [federated-memory](federated-memory/SKILL.md) | 68 | Agent persistent memory, vector stores, Qdrant/pgvector, cross-session recall |
 | [ai-skills-dev](ai-skills-dev/SKILL.md) | 67 | SKILL.md authoring, trigger optimization, template iteration |
+| [model-archive-management](model-archive-management/SKILL.md) | 100 | Verify a model archive by content not directory name, hf download + revision pinning, hash-verification tradeoffs, dated model-list hygiene |
 
 ### Security & Operations
 
