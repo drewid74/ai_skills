@@ -97,21 +97,21 @@ Tier: <hardware/use-case tier>
   - <org>/<repo> — <size> — <mirrored | urgent | blocked:<reason> | skip:<reason>>
 ```
 
-**Example — this stack's fleet, 2026-10-19** (multi-node GPU inference pool; kept here as a worked example of the shape above, not a template to copy verbatim into another stack):
+**Worked example** (illustrative, anonymized — a multi-node GPU inference pool; shows the shape above applied to a real archive-backup pass, not a template to copy verbatim into another stack):
 
 ```
-2026-10-19 snapshot, source: fleet-model-audit-2026-10-17 + live archive check
+<date> snapshot, source: a hardware/model audit + live archive check
 Tier: single GPU node (~121GB unified)
-  - nvidia/Qwen3.8-Flash-Next-NVFP4 — 124G — mirrored 2026-10-19
+  - nvidia/Qwen3.8-Flash-Next-NVFP4 — 124G — mirrored
 Tier: paired nodes, TP=2 (~240GB combined)
-  - nvidia/GLM-5.3-Flash-NVFP4 @ pinned revision — 190.4G — mirrored 2026-10-19 (pulled at the exact revision a serving node already ran, per Decision Framework > Pulling)
-  - XiaomiMiMo/MiMo-V2.6-Flash-RL — 166G — mirrored 2026-10-19
-  - XiaomiMiMo/MiMo-V2.6-Flash-MOPD — 166G — mirrored 2026-10-19
+  - nvidia/GLM-5.3-Flash-NVFP4 @ pinned revision — 190G — mirrored (pulled at the exact revision a serving node already ran, per Decision Framework > Pulling)
+  - XiaomiMiMo/MiMo-V2.6-Flash-RL — 166G — mirrored
+  - XiaomiMiMo/MiMo-V2.6-Flash-MOPD — 166G — mirrored
   - XiaomiMiMo official V2.6 DFlash drafter — blocked: does not exist yet (org only ships V2.5-era drafters as of this date)
-    - stand-in: vcruz305/MiMo-V2.6-Flash-RL-dflash-EXL3-4.0bpw (community, 366 downloads vs. 28 for the only other candidate) — mirrored 2026-10-19, re-check for official release
-  - brandonmusic/GLM-5.3-Flash-tr3-4bpw — blocked: redistribution-license terms unverified; do not pull until resolved
+    - stand-in: a community-published drafter with materially more downloads than any alternative — mirrored, re-check for official release
+  - a community-requantized checkpoint — blocked: redistribution-license terms unverified; do not pull until resolved
 Tier: edge/client nodes (8-16GB class)
-  - several hardware-tier-specific GGUF quants planned in an earlier pull-list, not yet executed — full-precision duplicates on disk are not substitutes for the requested quant
+  - several hardware-tier-specific GGUF quants planned earlier, not yet executed — full-precision duplicates on disk are not substitutes for the requested quant
 ```
 
-For the living version of a list like this — one that gets re-verified on a cadence, flags staleness, and tracks a persistent mirrored/urgent/blocked/skip status across sessions instead of being re-derived from scratch — see the companion `ai-innovation-radar` skill's Survey and Horizon modes. This skill is the reusable *process*; a specific stack's current list belongs in that stack's own living tracker, not frozen into a shared skill file.
+For the living version of a list like this — one that gets re-verified on a cadence, flags staleness, and tracks a persistent mirrored/urgent/blocked/skip status across sessions instead of being re-derived from scratch — keep one dedicated tracker file per stack (not this skill file) and treat it the same way: dated, source-labeled, re-checked against the live archive before anything is called missing.
